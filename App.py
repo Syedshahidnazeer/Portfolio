@@ -90,6 +90,47 @@ def main():
     st.write("- Data Science 2023 (Excelr - 14727/EXCELR/29052023)")
     st.write("- Business Analytics 2023 (Internshala - 9ckfw5soqxk)")
 
+    # Define your skills data (replace with actual values)
+    skills_data = [
+        {"Skill": "Data Cleaning", "Experience": 4, "Category": "Data Engineering"},
+        {"Skill": "Data Visualization", "Experience": 5, "Category": "Data Communication"},
+        {"Skill": "Machine Learning", "Experience": 3, "Category": "Modeling"},
+        {"Skill": "Problem Solving", "Experience": 5, "Category": "Critical Thinking"},
+        {"Skill": "Critical Thinking", "Experience": 4, "Category": "Analysis"},
+    ]
+
+    # Create a DataFrame from the skills data
+    df = pd.DataFrame(skills_data)
+
+    # Create a 3D scatter plot with color-coded categories
+    fig = px.scatter_3d(
+        df, 
+        x="Skill", 
+        y="Experience", 
+        z="Experience", 
+        color="Category", 
+        title="Data Analyst Skills Proficiency",
+        opacity=0.8  # Adjust opacity for better visibility
+    )
+
+    # Customize layout for a more interactive experience
+    fig.update_layout(
+        scene=dict(
+            xaxis_title="Skill",
+            yaxis_title="Experience",
+            zaxis_title="Experience",
+            # Enable camera rotation for better viewing angles
+            camera=dict(
+                eye=dict(x=1.2, y=-1.5, z=1.0)
+            )
+        ),
+        # Add hover information for each skill point
+        hovertemplate="<b>%{Skill}</b><br>Experience: %{Experience}<br>Category: %{Category}"
+    )
+
+    # Allow users to rotate the plot for better viewing angles
+    st.plotly_chart(fig, use_container_width=True)  # Stretch plot to fill container width
+
 
 if __name__ == "__main__":
     main()

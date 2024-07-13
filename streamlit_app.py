@@ -1,23 +1,9 @@
 import streamlit as st
-from streamlit_lottie import st_lottie
-import json
 from PIL import Image
 import pandas as pd
 import plotly.express as px
 
-# Load Lottie animation files (replace with your actual file paths)
-animation1 = "Animations/Animation - 1720882973633.json"
-animation2 = "Animations/Animation - 1720883141611.json"
-
-def load_lottie_animation(file_path):
-    with open(file_path, "r") as f:
-        animation_data = json.load(f)
-    return animation_data
-
 def main():
-    
-    # Display Lottie animation 1 (above profile image)
-    st_lottie(load_lottie_animation(animation1), speed=1, width=200, height=200)
 
     # Load your profile photo (replace with your actual image)
     profile_image = Image.open("images/1.jpg").resize((150, 150))
