@@ -1,14 +1,31 @@
-import os
 import streamlit as st
+from streamlit_lottie import st_lottie
+import json
+from PIL import Image
+import pandas as pd
+import plotly.express as px
+
+# Load Lottie animation files (replace with your actual file paths)
+animation1 = "Animations/Animation - 1720882973633.json"
+animation2 = "Animations/Animation - 1720883141611.json"
+
+def load_lottie_animation(file_path):
+    with open(file_path, "r") as f:
+        animation_data = json.load(f)
+    return animation_data
 
 def main():
-    st.title("SHAHID NAZEERSYED - Data Science Portfolio")
     
-    # Get the current working directory
-    current_dir = os.getcwd()
+    # Display Lottie animation 1 (above profile image)
+    st_lottie(load_lottie_animation(animation1), speed=1, width=200, height=200)
+
+    # Load your profile photo (replace with your actual image)
+    profile_image = Image.open("images/1.jpg").resize((150, 150))
+
+    st.title("SHAHID NAZEERSYED - Data Science Portfolio")
 
     # Sidebar with profile photo
-    st.sidebar.image(os.path.join(current_dir, "images", "1.jpg"), width=150)
+    st.sidebar.image(profile_image)
     st.sidebar.write("Kadapa, 516001")
     st.sidebar.write("+919912357968")
     st.sidebar.write("shahidnazeerds@gmail.com")
@@ -31,17 +48,48 @@ def main():
     st.write("  Mar 2023 - Dec 2023")
     st.write("  Led data-driven projects, deriving impactful insights that aligned with business goals.")
 
-    # Skills
-    st.write("## Skills")
-    st.write("- Expert in: Excel, Python, Power BI, Machine Learning")
-    st.write("- Intermediate in: MySQL, Tableau, Deep Learning")
+    # Sample data (replace with your actual skill levels)
+    skills_data = {
+        "Skill": ["Excel", "Python", "Power BI", "Machine Learning", "MySQL", "Tableau", "Deep Learning"],
+        "Experience": ["Expert", "Expert", "Expert", "Expert", "Intermediate", "Intermediate", "Intermediate"]
+    }
+
+    # Create a DataFrame
+    df = pd.DataFrame(skills_data)
+
+    # Create a 3D scatter plot
+    fig = px.scatter_3d(df, x="Skill", y="Experience", z="Experience", color="Skill",
+                        title="Skills Proficiency in 3D")
+    fig.update_layout(scene=dict(xaxis_title="Skill", yaxis_title="Experience", zaxis_title="Experience"))
+
+    # Display the plot in Streamlit
+    st.plotly_chart(fig)
+    
+    # Display Lottie animation 2 (below profile image)
+    st_lottie(load_lottie_animation(animation2), speed=1, width=200, height=200)
+
+    # Sample data (replace with your actual skill levels)
+    skills_data = {
+        "Skill": ["Excel", "Python", "Power BI", "Machine Learning", "MySQL", "Tableau", "Deep Learning"],
+        "Experience": ["Expert", "Expert", "Expert", "Expert", "Intermediate", "Intermediate", "Intermediate"]
+    }
+
+    # Create a DataFrame
+    df = pd.DataFrame(skills_data)
+
+    # Create a radar chart
+    fig = px.line_polar(df, r="Experience", theta="Skill", line_close=True,
+                        title="Skills Proficiency (Radar Chart)")
+    fig.update_traces(fill="toself")
+
+    # Display the plot in Streamlit
+    st.plotly_chart(fig)
 
     # Certifications
     st.write("## Licenses & Certifications")
     st.write("- Data Science 2023 (Excelr - 14727/EXCELR/29052023)")
     st.write("- Business Analytics 2023 (Internshala - 9ckfw5soqxk)")
 
+
 if __name__ == "__main__":
     main()
-
-
