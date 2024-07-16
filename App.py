@@ -1,23 +1,11 @@
 import streamlit as st
-from streamlit_lottie import st_lottie
-import json
 from PIL import Image
 import pandas as pd
 import plotly.express as px
-
-# Load Lottie animation files (replace with your actual file paths)
-animation1 = "Animations/Animation - 1720882973633.json"
-animation2 = "Animations/Animation - 1720883141611.json"
-
-def load_lottie_animation(file_path):
-    with open(file_path, "r") as f:
-        animation_data = json.load(f)
-    return animation_data
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def main():
-    
-    # Display Lottie animation 1 (above profile image)
-    st_lottie(load_lottie_animation(animation1), speed=1, width=200, height=200)
 
     # Load your profile photo (replace with your actual image)
     profile_image = Image.open("images/1.jpg").resize((150, 150))
@@ -64,9 +52,6 @@ def main():
 
     # Display the plot in Streamlit
     st.plotly_chart(fig)
-    
-    # Display Lottie animation 2 (below profile image)
-    st_lottie(load_lottie_animation(animation2), speed=1, width=200, height=200)
 
     # Sample data (replace with your actual skill levels)
     skills_data = {
@@ -88,7 +73,44 @@ def main():
     # Certifications
     st.write("## Licenses & Certifications")
     st.write("- Data Science 2023 (Excelr - 14727/EXCELR/29052023)")
-    st.write("- Business Analytics 2023 (Internshala - 9ckfw5soqxk)")
+    st.write("- Business Analytics 2023 (Internshala - 9ckfw5soqxk)")    
+    
+    # Define your proficiency levels for different chart types (adjust values)
+    proficiency_levels = {
+        "Scatter Plot": 4,
+        "Line Graph": 5,
+        "Bar Chart": 4,
+        "Heatmap": 3,
+    }
+
+    # Create pie chart data
+    chart_types = list(proficiency_levels.keys())
+    proficiency_values = list(proficiency_levels.values())
+
+    fig = go.Figure(data=[go.Pie(labels=chart_types, values=proficiency_values)])
+    fig.update_layout(
+        title="Data Visualization District",
+        showlegend=False  # Remove default legend, add custom later
+    )
+
+    # Add click events and pop-ups for chart details (replace with your content)
+    def show_chart_details(chart_type):
+        st.write(f"**{chart_type} Details:**")
+        st.write("Strengths: ...")
+        st.write("Weaknesses: ...")
+
+    fig.data[0].customdata = chart_types
+    fig.update_traces(textposition='outside', textinfo='custom')
+    fig.on_click(show_chart_details)
+
+    st.plotly_chart(fig)
+
+    # Add custom legend outside the pie chart
+    st.write("Legend:")
+    for chart_type, value in zip(chart_types, proficiency_values):
+        color = fig.data[0].marker.colors[chart_types.index(chart_type)]
+        st.write(f"- {chart_type} ({value})", unsafe_allow_html=True, style=f"color: {color}")
+
 
     # Define your skills data (replace with actual values)
     skills_data = [
@@ -100,36 +122,39 @@ def main():
     ]
 
     # Create a DataFrame from the skills data
-    df = pd.DataFrame(skills_data)
+    df_skills = pd.DataFrame(skills_data)
 
-    # Create a 3D scatter plot with color-coded categories
-    fig = px.scatter_3d(
-        df, 
-        x="Skill", 
-        y="Experience", 
-        z="Experience", 
-        color="Category", 
-        title="Data Analyst Skills Proficiency",
-        opacity=0.8  # Adjust opacity for better visibility
+    # Streamlit controls
+    selected_category = st.selectbox("Filter by Category", df_skills['Category'].unique())
+
+    # Filter data based on selection
+    df_filtered = df_skills[df_skills['Category'] == selected_category]
+
+    # Create a bar chart
+    fig_skills = go.Figure(go.Bar(
+        x=df_filtered['Skill'],
+        y=df_filtered['Experience'],
+        marker_color='royalblue',
+        text=df_filtered['Experience'],
+        textposition='auto'
+    ))
+
+    # Customize the layout
+    fig_skills.update_layout(
+        title='Skills Experience',
+        xaxis_title='Skill',
+        yaxis_title='Experience (Years)',
+        paper_bgcolor='rgba(0, 0, 0, 0.1)',
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        font=dict(color='white')
     )
 
-    # Customize layout for a more interactive experience
-    fig.update_layout(
-        scene=dict(
-            xaxis_title="Skill",
-            yaxis_title="Experience",
-            zaxis_title="Experience",
-            # Enable camera rotation for better viewing angles
-            camera=dict(
-                eye=dict(x=1.2, y=-1.5, z=1.0)
-            )
-        ),
-        # Add hover information for each skill point
-        hovertemplate="<b>%{Skill}</b><br>Experience: %{Experience}<br>Category: %{Category}"
-    )
+    # Display the chart
+    st.plotly_chart(fig_skills)
 
-    # Allow users to rotate the plot for better viewing angles
-    st.plotly_chart(fig, use_container_width=True)  # Stretch plot to fill container width
+
+
+
 
 
 if __name__ == "__main__":
