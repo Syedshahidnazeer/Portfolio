@@ -118,18 +118,15 @@ def main():
     # Responsive CSS
     st.markdown("""
     <style>
-    .big-font {font-size:clamp(30px, 5vw, 50px) !important; color: #4A4A4A;}
-    .medium-font {font-size:clamp(20px, 4vw, 30px) !important; color: #4A4A4A;}
-    .small-font {font-size:clamp(16px, 3vw, 20px) !important; color: #4A4A4A;}
-    .stSelectbox {max-width: 100%;}
-    .stButton > button {width: 100%;}
-    .responsive-container {display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between;}
-    .responsive-container > div {flex: 1 1 200px;}
+    .big-font {font-size:calc(30px + 2vw) !important; color: #4A4A4A;}
+    .medium-font {font-size:calc(20px + 1vw) !important; color: #4A4A4A;}
+    .small-font {font-size:calc(16px + 0.5vw) !important; color: #4A4A4A;}
+    .stSelectbox {max-width: 300px;}
     @media (max-width: 768px) {
-        .responsive-container {flex-direction: column;}
-        .responsive-container > div {flex: 1 1 100%;}
+        .responsive-container {
+            flex-direction: column;
+        }
     }
-    .chart-container {width: 100%; overflow-x: auto;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -143,8 +140,8 @@ def main():
         orientation="horizontal",
         styles={
             "container": {"padding": "0!important", "background-color": "rgba(250, 250, 250, 0.8)"},
-            "icon": {"color": "orange", "font-size": "clamp(16px, 3vw, 25px)"}, 
-            "nav-link": {"font-size": "clamp(14px, 2.5vw, 20px)", "text-align": "center", "margin":"0px", "--hover-color": "#eee"},
+            "icon": {"color": "orange", "font-size": "calc(16px + 0.5vw)"}, 
+            "nav-link": {"font-size": "calc(14px + 0.5vw)", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
             "nav-link-selected": {"background-color": "#02ab21"},
         }
     )
@@ -167,8 +164,8 @@ def main():
         orientation="horizontal",
         styles={
             "container": {"padding": "0!important", "background-color": "rgba(250, 250, 250, 0.8)"},
-            "icon": {"color": "orange", "font-size": "clamp(16px, 3vw, 25px)"}, 
-            "nav-link": {"font-size": "clamp(14px, 2.5vw, 20px)", "text-align": "center", "margin":"0px", "--hover-color": "#eee"},
+            "icon": {"color": "orange", "font-size": "calc(16px + 0.5vw)"}, 
+            "nav-link": {"font-size": "calc(14px + 0.5vw)", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
             "nav-link-selected": {"background-color": "#02ab21"},
         }
     )
@@ -203,11 +200,6 @@ def main():
             if st.button("Twitter"):
                 st.markdown("[Follow me on Twitter](https://twitter.com/yourhandle)")
 
-        # Wrap the chart in a container for better mobile view
-        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-        st.plotly_chart(create_education_chart(), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
     elif selected == "Skills":
         st.header(f"Skills & Expertise - {role}")
         
@@ -231,7 +223,6 @@ def main():
                      color='Proficiency',
                      color_continuous_scale='Viridis')
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
         
         st.subheader("Additional Skills")
         if role == "Data Analyst":
@@ -288,11 +279,6 @@ def main():
         # Add a project filter
         project_filter = st.multiselect("Filter projects by type", ["Data Analysis", "Machine Learning", "Web Development"])
         st.write(f"Showing projects related to: {', '.join(project_filter)}")
-
-        # Wrap the chart in a container for better mobile view
-        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-        st.plotly_chart(create_project_impact_chart(), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
     elif selected == "Contact":
         st.header("Contact")
