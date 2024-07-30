@@ -2,5 +2,4 @@ streamlit
 plotly
 streamlit_option_menu
 streamlit_chat
-streamlit_particles
 google-generativeai
