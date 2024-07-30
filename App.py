@@ -6,15 +6,17 @@ import base64
 from streamlit_option_menu import option_menu
 import google.generativeai as genai
 
-def set_gif_background(gif_file):
-    with open(gif_file, "rb") as f:
-        gif_data = f.read()
-    b64_encoded = base64.b64encode(gif_data).decode()
+def set_background(image_file, is_gif=False):
+    with open(image_file, "rb") as f:
+        img_data = f.read()
+    b64_encoded = base64.b64encode(img_data).decode()
+    img_type = "gif" if is_gif else "png"
     style = f"""
         <style>
         .stApp {{
-            background-image: url(data:image/gif;base64,{b64_encoded});
+            background-image: url(data:image/{img_type};base64,{b64_encoded});
             background-size: cover;
+            background-attachment: fixed;
         }}
         </style>
     """
@@ -62,6 +64,7 @@ def get_binary_file_downloader_html(bin_file, file_label='File'):
     bin_str = base64.b64encode(data).decode()
     href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">Download {file_label}</a>'
     return href
+
 def chatbot():
     st.header("Gemini Chat Bot")
     st.header("Gemini Chat Bot")
@@ -108,21 +111,24 @@ def chatbot():
         with st.chat_message("assistant"):
             st.markdown(response.text)
 
+
 def main():
     st.set_page_config(page_title="SYED SHAHID NAZEER - Portfolio", layout="wide")
 
-    # Custom CSS for modern look
+    # Responsive CSS
     st.markdown("""
     <style>
-    .big-font {font-size:50px !important; color: #4A4A4A;}
-    .medium-font {font-size:30px !important; color: #4A4A4A;}
-    .small-font {font-size:20px !important; color: #4A4A4A;}
+    .big-font {font-size:calc(30px + 2vw) !important; color: #4A4A4A;}
+    .medium-font {font-size:calc(20px + 1vw) !important; color: #4A4A4A;}
+    .small-font {font-size:calc(16px + 0.5vw) !important; color: #4A4A4A;}
     .stSelectbox {max-width: 300px;}
+    @media (max-width: 768px) {
+        .responsive-container {
+            flex-direction: column;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
-
-    # Set background image (replace 'background.jpg' with your image file)
-    set_gif_background("background.gif")
 
     # Role selection navbar
     role = option_menu(
@@ -134,13 +140,21 @@ def main():
         orientation="horizontal",
         styles={
             "container": {"padding": "0!important", "background-color": "rgba(250, 250, 250, 0.8)"},
-            "icon": {"color": "orange", "font-size": "25px"}, 
-            "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
+            "icon": {"color": "orange", "font-size": "calc(16px + 0.5vw)"}, 
+            "nav-link": {"font-size": "calc(14px + 0.5vw)", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
             "nav-link-selected": {"background-color": "#02ab21"},
         }
     )
 
-    # Navigation bar (modified to include Chat Bot)
+    # Set background based on role
+    background_images = {
+        "Data Analyst": "data_analyst_bg.jpg",
+        "Data Scientist": "data_scientist_bg.jpg",
+        "Python Developer": "python_developer_bg.jpg"
+    }
+    set_background(background_images[role])
+
+    # Page selection navbar
     selected = option_menu(
         menu_title=None,
         options=["Home", "Skills", "Projects", "Contact", "Chat Bot"],
@@ -149,13 +163,12 @@ def main():
         default_index=0,
         orientation="horizontal",
         styles={
-            "container": {"padding": "0!important", "background-color": "#fafafa"},
-            "icon": {"color": "orange", "font-size": "25px"}, 
-            "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
+            "container": {"padding": "0!important", "background-color": "rgba(250, 250, 250, 0.8)"},
+            "icon": {"color": "orange", "font-size": "calc(16px + 0.5vw)"}, 
+            "nav-link": {"font-size": "calc(14px + 0.5vw)", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
             "nav-link-selected": {"background-color": "#02ab21"},
         }
     )
-
     if selected == "Home":
         st.markdown(f'<p class="big-font">SYED SHAHID NAZEER</p>', unsafe_allow_html=True)
         st.markdown(f'<p class="medium-font">{role.upper()}</p>', unsafe_allow_html=True)
@@ -174,6 +187,19 @@ def main():
         
         st.plotly_chart(create_education_chart(), use_container_width=True)
 
+        # Add an interactive element
+        st.write("Let's connect! Choose your preferred platform:")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("LinkedIn"):
+                st.markdown("[Visit my LinkedIn Profile](https://www.linkedin.com/in/yourprofile)")
+        with col2:
+            if st.button("GitHub"):
+                st.markdown("[Check out my GitHub](https://github.com/yourusername)")
+        with col3:
+            if st.button("Twitter"):
+                st.markdown("[Follow me on Twitter](https://twitter.com/yourhandle)")
+
     elif selected == "Skills":
         st.header(f"Skills & Expertise - {role}")
         
@@ -189,6 +215,8 @@ def main():
             'Proficiency': [85, 90, 80, 85, 75]  # Adjust these values as needed
         })
         
+        # Wrap the chart in a container for better mobile view
+        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         fig = px.bar(skills_data, x='Skill', y='Proficiency', 
                      title=f'Core Skills - {role}',
                      labels={'Proficiency': 'Proficiency Level'},
@@ -203,6 +231,13 @@ def main():
             st.write("TensorFlow, PyTorch, Time Series Analysis, Feature Engineering, Cloud Computing (AWS/GCP)")
         else:  # Python Developer
             st.write("RESTful APIs, Docker, Git, Agile Methodologies, Test-Driven Development")
+
+        # Add an interactive skill rating system
+        st.subheader("Rate Your Own Skills")
+        user_skill = st.text_input("Enter a skill you want to rate")
+        user_rating = st.slider("Rate your proficiency", 0, 100, 50)
+        if st.button("Add Skill"):
+            st.success(f"You rated your {user_skill} skill at {user_rating}%")
 
     elif selected == "Projects":
         st.header(f"Projects - {role}")
@@ -241,6 +276,10 @@ def main():
         
         st.plotly_chart(create_project_impact_chart(), use_container_width=True)
 
+        # Add a project filter
+        project_filter = st.multiselect("Filter projects by type", ["Data Analysis", "Machine Learning", "Web Development"])
+        st.write(f"Showing projects related to: {', '.join(project_filter)}")
+
     elif selected == "Contact":
         st.header("Contact")
         st.write("Phone: +91-9912357968")
@@ -261,8 +300,24 @@ def main():
                 st.markdown(get_binary_file_downloader_html(resume_path, f'{role} Resume'), unsafe_allow_html=True)
             else:
                 st.warning("Please fill in all fields before submitting.")
+
+        # Add a map
+        st.subheader("My Location")
+        st.map({"lat": [17.3850], "lon": [78.4867]})
+
     elif selected == "Chat Bot":
         # Call the chatbot function here
         chatbot()
+
+        
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("© 2024 Syed Shahid Nazeer")
+    with col2:
+        background_type = st.selectbox("Choose background type", ["Static", "Dynamic"])
+        if background_type == "Dynamic":
+            set_background("background.gif", is_gif=True)
+
 if __name__ == "__main__":
     main()
