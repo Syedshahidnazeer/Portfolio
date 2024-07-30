@@ -4,7 +4,6 @@ import pandas as pd
 import os
 import base64
 import PyPDF2 as pdf
-from dotenv import load_dotenv
 import json
 import ast
 import re 
