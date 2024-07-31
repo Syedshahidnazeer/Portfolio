@@ -4,5 +4,6 @@ streamlit_option_menu
 streamlit_chat
 PyPDF2
 pyvis
+matplotlib
 fontawesome
 google-generativeai
