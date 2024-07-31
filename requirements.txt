@@ -3,4 +3,6 @@ plotly
 streamlit_option_menu
 streamlit_chat
 PyPDF2
+pyvis
+fontawesome
 google-generativeai
