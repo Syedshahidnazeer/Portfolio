@@ -8,7 +8,7 @@
             
         
 <center>
-<h1>Data Scientist Skill Network</h1>
+<h1>Data Analyst Skill Network</h1>
 </center>
 
 <!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
@@ -27,7 +27,7 @@
 
 
         <center>
-          <h1>Data Scientist Skill Network</h1>
+          <h1>Data Analyst Skill Network</h1>
         </center>
         <style type="text/css">
 
@@ -88,8 +88,8 @@
                   
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"group": "Programming", "id": "Python", "label": "Python", "shape": "dot"}, {"group": "AI/ML", "id": "Machine Learning", "label": "Machine Learning", "shape": "dot"}, {"group": "AI/ML", "id": "Deep Learning", "label": "Deep Learning", "shape": "dot"}, {"group": "AI/ML", "id": "NLP", "label": "NLP", "shape": "dot"}, {"group": "Data", "id": "Big Data", "label": "Big Data", "shape": "dot"}]);
-                  edges = new vis.DataSet([{"from": "Python", "title": "Model Building", "to": "Machine Learning"}, {"from": "Python", "title": "Neural Networks", "to": "Deep Learning"}, {"from": "Python", "title": "Text Analysis", "to": "NLP"}, {"from": "Machine Learning", "title": "Scalability", "to": "Big Data"}, {"from": "Deep Learning", "title": "Large Datasets", "to": "Big Data"}]);
+                  nodes = new vis.DataSet([{"group": "Databases", "id": "SQL", "label": "SQL", "shape": "dot"}, {"group": "Tools", "id": "Excel", "label": "Excel", "shape": "dot"}, {"group": "Analysis", "id": "Data Visualization", "label": "Data Visualization", "shape": "dot"}, {"group": "Analysis", "id": "Statistical Analysis", "label": "Statistical Analysis", "shape": "dot"}, {"group": "Business", "id": "Business Intelligence", "label": "Business Intelligence", "shape": "dot"}]);
+                  edges = new vis.DataSet([{"from": "SQL", "title": "Data Insights", "to": "Data Visualization"}, {"from": "Excel", "title": "Reporting", "to": "Data Visualization"}, {"from": "Statistical Analysis", "title": "Decision Making", "to": "Business Intelligence"}, {"from": "Data Visualization", "title": "Actionable Insights", "to": "Business Intelligence"}]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
