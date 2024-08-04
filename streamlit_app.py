@@ -3,7 +3,6 @@ import plotly.express as px
 import pandas as pd
 import os
 import base64
-import tempfile
 import requests
 from pydub import AudioSegment
 from fpdf import FPDF
