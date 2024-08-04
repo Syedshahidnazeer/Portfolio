@@ -3,6 +3,12 @@ import plotly.express as px
 import pandas as pd
 import os
 import base64
+import tempfile
+import requests
+from pydub import AudioSegment
+from fpdf import FPDF
+from moviepy.editor import *
+import time
 import PyPDF2 as pdf
 import json
 import ast
@@ -401,11 +407,127 @@ def qanda_bot():
     st.subheader("Chat History:")
     for role, text in st.session_state['chat_history']:
         st.write(f"{role}: {text}") 
+# Set your AssemblyAI API key
+ASSEMBLY_AI_API_KEY = "ef55ef0e076444d399575c7859de966c"
+
+# Function to transcribe audio/video files
+def transcribe_file(file_path):
+    headers = {
+        "authorization": ASSEMBLY_AI_API_KEY,
+        "content-type": "application/json"
+    }
+
+    with open(file_path, "rb") as f:
+        response = requests.post("https://api.assemblyai.com/v2/upload", headers=headers, data=f)
+        response.raise_for_status()
+    upload_url = response.json()["upload_url"]
+    data = {"audio_url": upload_url}
+
+    response = requests.post("https://api.assemblyai.com/v2/transcript", json=data, headers=headers)
+    response.raise_for_status()
+    transcript_id = response.json()["id"]
+
+    while True:
+        response = requests.get(f"https://api.assemblyai.com/v2/transcript/{transcript_id}", headers=headers)
+        response.raise_for_status()
+        status = response.json()["status"]
+
+        if status == "completed":
+            return response.json()["text"]
+        elif status == "error":
+            error_message = response.json().get("error", "Unknown error")
+            raise Exception(f"Transcription failed: {error_message}")
+        time.sleep(5)
+
+# Function to create PDF
+def create_pdf(text):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, text)
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        pdf_path = temp_file.name
+        pdf.output(pdf_path)
+    
+    return pdf_path
+
+# Function to get summary from AssemblyAI
+def get_summary(audio_url):
+    headers = {
+        "authorization": ASSEMBLY_AI_API_KEY,
+        "content-type": "application/json"
+    }
+
+    data = {
+        "audio_url": audio_url,
+        "summarization": True,
+    }
+
+    response = requests.post("https://api.assemblyai.com/v2/transcript", json=data, headers=headers)
+    response.raise_for_status()
+    transcript_id = response.json()["id"]
+
+    while True:
+        response = requests.get(f"https://api.assemblyai.com/v2/transcript/{transcript_id}", headers=headers)
+        response.raise_for_status()
+        status = response.json()["status"]
+
+        if status == "completed":
+            return response.json()["summary"]
+        elif status == "error":
+            error_message = response.json().get("error", "Unknown error")
+            raise Exception(f"Summarization failed: {error_message}")
+        time.sleep(5)
+
+# Streamlit UI for the transcription bot
+def transcription_bot():
+    st.subheader("Transcription Bot")
+
+    uploaded_file = st.file_uploader("Choose an audio or video file", type=["mp3", "mp4", "avi", "mov"])
+    if uploaded_file is not None:
+        with tempfile.NamedTemporaryFile(delete=False, suffix="." + uploaded_file.name.split(".")[-1]) as temp_file:
+            temp_file.write(uploaded_file.getvalue())
+            file_path = temp_file.name
+
+        if uploaded_file.name.lower().endswith((".mp4", ".avi", ".mov")):
+            audio = AudioSegment.from_file(file_path, format=file_path.split(".")[-1])
+            audio_path = os.path.splitext(file_path)[0] + ".mp3"
+            audio.export(audio_path, format="mp3")
+            file_path = audio_path
+
+        with st.spinner("Transcribing... This may take a few minutes."):
+            # Upload the file to AssemblyAI (Get the audio_url here)
+            headers = {
+                "authorization": ASSEMBLY_AI_API_KEY,
+            }
+            response = requests.post(
+                "https://api.assemblyai.com/v2/upload",
+                headers=headers,
+                data=open(file_path, "rb"),
+            )
+            response.raise_for_status()
+            audio_url = response.json()["upload_url"]  # Correctly define audio_url
+
+            transcript = transcribe_file(file_path)
+
+        if 'transcript' in locals():
+            st.success("Transcription complete!")
+            st.text_area("Transcript:", transcript, height=300)
+
+            # ... (Download as TXT and PDF buttons - Implementation remains the same)
+
+            # Get and display summary
+            with st.spinner("Generating Summary..."):
+                summary = get_summary(audio_url)  # Now you can use audio_url here
+            st.header("Summary:")
+            st.write(summary)
+
 # Chatbot Selection
 def chatbot():
     bot_choice = st.selectbox(
         "Select a Chatbot:",
-        ["Thesis Writer Assistant", "Resume ATS Score Bot", "Code Explainer Bot", "Healerbeast (BFF)", "Q&A Bot"]
+        ["Thesis Writer Assistant", "Resume ATS Score Bot", "Code Explainer Bot", "Healerbeast (BFF)", "Q&A Bot", "Transcription Bot"]  # Added "Transcription Bot" here
     )
 
     if bot_choice == "Thesis Writer Assistant":
@@ -416,6 +538,10 @@ def chatbot():
         code_explainer_bot()
     elif bot_choice == "Healerbeast (BFF)":
         healerbeast_bff()
+    elif bot_choice == "Transcription Bot":  # Changed from "transcription_bot" to "Transcription Bot"
+        st.title("AssemblyAI Multi-Bot Assistant")
+        st.write("Welcome to your AI-powered assistant! Choose a bot to get started.")
+        transcription_bot()
     elif bot_choice == "Q&A Bot":
         qanda_bot()  # Call the Q&A bot function
 

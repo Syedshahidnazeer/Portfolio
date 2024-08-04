@@ -3,7 +3,13 @@ plotly
 streamlit_option_menu
 streamlit_chat
 PyPDF2
+fpdf
+pydub
 pyvis
 matplotlib
+Assemblyai
+tempfile
+requests
+moviepy
 fontawesome
 google-generativeai
