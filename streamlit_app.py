@@ -10,6 +10,7 @@ from moviepy.editor import *
 import time
 import PyPDF2 as pdf
 import json
+import tempfile
 import ast
 import re 
 import plotly.graph_objects as go
@@ -475,53 +476,51 @@ def get_summary(audio_url):
             raise Exception(f"Summarization failed: {error_message}")
         time.sleep(5)
 
-# Streamlit UI for the transcription bot
 def transcription_bot():
     st.subheader("Transcription Bot")
 
     uploaded_file = st.file_uploader("Choose an audio or video file", type=["mp3", "mp4", "avi", "mov"])
     if uploaded_file is not None:
-        file_path = uploaded_file.name
+        try:
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_file.write(uploaded_file.getvalue())
+                file_path = temp_file.name
 
-        with open(file_path, "wb") as f:
-            f.write(uploaded_file.getvalue())
+            if file_path.lower().endswith((".mp4", ".avi", ".mov")):
+                audio = AudioSegment.from_file(file_path, format=file_path.split(".")[-1])
+                audio_path = os.path.splitext(file_path)[0] + ".mp3"
+                audio.export(audio_path, format="mp3")
+                file_path = audio_path
 
-        if file_path.lower().endswith((".mp4", ".avi", ".mov")):
-            audio = AudioSegment.from_file(file_path, format=file_path.split(".")[-1])
-            audio_path = os.path.splitext(file_path)[0] + ".mp3"
-            audio.export(audio_path, format="mp3")
-            file_path = audio_path
+            with st.spinner("Transcribing... This may take a few minutes."):
+                headers = {
+                    "authorization": ASSEMBLY_AI_API_KEY,
+                }
+                response = requests.post(
+                    "https://api.assemblyai.com/v2/upload",
+                    headers=headers,
+                    data=open(file_path, "rb"),
+                )
+                response.raise_for_status()
+                audio_url = response.json()["upload_url"]
 
-        with st.spinner("Transcribing... This may take a few minutes."):
-            # Upload the file to AssemblyAI (Get the audio_url here)
-            headers = {
-                "authorization": ASSEMBLY_AI_API_KEY,
-            }
-            response = requests.post(
-                "https://api.assemblyai.com/v2/upload",
-                headers=headers,
-                data=open(file_path, "rb"),
-            )
-            response.raise_for_status()
-            audio_url = response.json()["upload_url"]  # Correctly define audio_url
+                transcript = transcribe_file(file_path)
 
-            transcript = transcribe_file(file_path)
+            if 'transcript' in locals():
+                st.success("Transcription complete!")
+                st.text_area("Transcript:", transcript, height=300)
 
-        if 'transcript' in locals():
-            st.success("Transcription complete!")
-            st.text_area("Transcript:", transcript, height=300)
+                st.download_button(label="Download Transcript as TXT", data=transcript, file_name="transcript.txt", mime="text/plain")
+                pdf_output = create_pdf(transcript)
+                st.download_button(label="Download Transcript as PDF", data=pdf_output, file_name="transcript.pdf", mime="application/pdf")
 
-            # Download as TXT and PDF buttons
-            st.download_button(label="Download Transcript as TXT", data=transcript, file_name="transcript.txt", mime="text/plain")
-            pdf_output = create_pdf(transcript)
-            st.download_button(label="Download Transcript as PDF", data=pdf_output, file_name="transcript.pdf", mime="application/pdf")
+                with st.spinner("Generating Summary..."):
+                    summary = get_summary(audio_url)
+                st.header("Summary:")
+                st.write(summary)
 
-            # Get and display summary
-            with st.spinner("Generating Summary..."):
-                summary = get_summary(audio_url)  # Now you can use audio_url here
-            st.header("Summary:")
-            st.write(summary)
-
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 # Chatbot Selection
 def chatbot():
     bot_choice = st.selectbox(
