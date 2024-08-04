@@ -408,7 +408,6 @@ def qanda_bot():
         st.write(f"{role}: {text}") 
 # Set your AssemblyAI API key
 ASSEMBLY_AI_API_KEY = "ef55ef0e076444d399575c7859de966c"
-
 # Function to transcribe audio/video files
 def transcribe_file(file_path):
     headers = {
@@ -445,11 +444,8 @@ def create_pdf(text):
     pdf.set_font("Arial", size=12)
     pdf.multi_cell(0, 10, text)
     
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-        pdf_path = temp_file.name
-        pdf.output(pdf_path)
-    
-    return pdf_path
+    pdf_output = pdf.output(dest='S').encode('latin1')  # Output PDF as string
+    return pdf_output
 
 # Function to get summary from AssemblyAI
 def get_summary(audio_url):
@@ -485,11 +481,12 @@ def transcription_bot():
 
     uploaded_file = st.file_uploader("Choose an audio or video file", type=["mp3", "mp4", "avi", "mov"])
     if uploaded_file is not None:
-        with tempfile.NamedTemporaryFile(delete=False, suffix="." + uploaded_file.name.split(".")[-1]) as temp_file:
-            temp_file.write(uploaded_file.getvalue())
-            file_path = temp_file.name
+        file_path = uploaded_file.name
 
-        if uploaded_file.name.lower().endswith((".mp4", ".avi", ".mov")):
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getvalue())
+
+        if file_path.lower().endswith((".mp4", ".avi", ".mov")):
             audio = AudioSegment.from_file(file_path, format=file_path.split(".")[-1])
             audio_path = os.path.splitext(file_path)[0] + ".mp3"
             audio.export(audio_path, format="mp3")
@@ -514,7 +511,10 @@ def transcription_bot():
             st.success("Transcription complete!")
             st.text_area("Transcript:", transcript, height=300)
 
-            # ... (Download as TXT and PDF buttons - Implementation remains the same)
+            # Download as TXT and PDF buttons
+            st.download_button(label="Download Transcript as TXT", data=transcript, file_name="transcript.txt", mime="text/plain")
+            pdf_output = create_pdf(transcript)
+            st.download_button(label="Download Transcript as PDF", data=pdf_output, file_name="transcript.pdf", mime="application/pdf")
 
             # Get and display summary
             with st.spinner("Generating Summary..."):
@@ -526,7 +526,7 @@ def transcription_bot():
 def chatbot():
     bot_choice = st.selectbox(
         "Select a Chatbot:",
-        ["Thesis Writer Assistant", "Resume ATS Score Bot", "Code Explainer Bot", "Healerbeast (BFF)", "Q&A Bot", "Transcription Bot"]  # Added "Transcription Bot" here
+        ["Thesis Writer Assistant", "Resume ATS Score Bot", "Code Explainer Bot", "Healerbeast (BFF)", "Q&A Bot", "Transcription Bot"]
     )
 
     if bot_choice == "Thesis Writer Assistant":
@@ -537,12 +537,12 @@ def chatbot():
         code_explainer_bot()
     elif bot_choice == "Healerbeast (BFF)":
         healerbeast_bff()
-    elif bot_choice == "Transcription Bot":  # Changed from "transcription_bot" to "Transcription Bot"
+    elif bot_choice == "Transcription Bot":
         st.title("AssemblyAI Multi-Bot Assistant")
         st.write("Welcome to your AI-powered assistant! Choose a bot to get started.")
         transcription_bot()
     elif bot_choice == "Q&A Bot":
-        qanda_bot()  # Call the Q&A bot function
+        qanda_bot()
 
 def main():
     st.set_page_config(page_title="SYED SHAHID NAZEER - Portfolio", layout="wide")
