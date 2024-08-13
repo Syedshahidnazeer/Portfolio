@@ -4,6 +4,7 @@ streamlit_option_menu
 streamlit_chat
 PyPDF2
 fpdf
+pyyaml
 pydub
 pyvis
 matplotlib
