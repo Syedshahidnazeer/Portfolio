@@ -41,8 +41,11 @@ from networks import create_skills_network,create_project_network
 from projects import get_projects
 from skills import get_skills_data
 
-st.set_page_config(page_title="Syed Shahid Nazeer - Portfolio", layout="wide")
-# Define your chatbots
+st.set_page_config(
+    page_title="Syed Shahid Nazeer - Portfolio",
+    layout="wide",
+    initial_sidebar_state="expanded",  # Example: set sidebar to be expanded initially
+)
  
 
 def main():  
