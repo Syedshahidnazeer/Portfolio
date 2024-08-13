@@ -42,14 +42,11 @@ from projects import get_projects
 from skills import get_skills_data
 
 
-def main():  
-    
+def main():
     st.set_page_config(
     page_title="Syed Shahid Nazeer - Portfolio",
     layout="wide",
-    initial_sidebar_state="expanded",  # Example: set sidebar to be expanded initially
-)
-
+    initial_sidebar_state="expanded",)
     # Example usage
     display_page_with_indian_flag_animation("Home")
     
