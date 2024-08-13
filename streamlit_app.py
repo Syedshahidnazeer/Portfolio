@@ -41,13 +41,14 @@ from networks import create_skills_network,create_project_network
 from projects import get_projects
 from skills import get_skills_data
 
-
-def main():
-    st.set_page_config(
+st.set_page_config(
     page_title="Syed Shahid Nazeer - Portfolio",
     layout="wide",
     initial_sidebar_state="expanded",)
     # Example usage
+
+def main():
+
     display_page_with_indian_flag_animation("Home")
     
     show_announcement("🎉 New feature alert: Thesis Writer Assistant now available!")
