@@ -5,6 +5,7 @@ import uuid
 import base64
 from fpdf import FPDF
 import os
+from streamlit_javascript import st_javascript
 
 @st.cache_data
 def load_lottieurl(url: str):
@@ -24,12 +25,18 @@ def display_lottie(url, height=200, key=None):
         st_lottie(lottie_json, height=height, key=key)
     else:
         st.warning("Failed to load Lottie animation. Please check the URL.")
+
 @st.cache_data
 def display_pdf(file_path):
+    """Displays a PDF file using st.components.v1."""
     with open(file_path, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
-    st.markdown(pdf_display, unsafe_allow_html=True)
+        pdf_data = f.read()
+    base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+    pdf_display = f"""
+    <embed src="data:application/pdf;base64,{base64_pdf}" type="application/pdf" width="700" height="1000" />
+    """
+    st.components.v1.html(pdf_display, height=1000)
+
 @st.cache_data
 def get_binary_file_downloader_html(file_path, file_label):
     with open(file_path, 'rb') as f:
@@ -37,7 +44,6 @@ def get_binary_file_downloader_html(file_path, file_label):
     bin_str = base64.b64encode(data).decode()
     href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(file_path)}">Download {file_label}</a>'
     return href
-@st.cache_data
 def show_announcement(message):
     """Displays an announcement with a close button."""
     st.markdown(f"""
@@ -45,30 +51,38 @@ def show_announcement(message):
         <div class="announcement-shine"></div>
         <div class="announcement-content">
             <div class="announcement-text">{message}</div>
-            <div class="announcement-close" onclick="this.parentElement.parentElement.style.display='none'">×</div>
+            <div class="announcement-close" id="close-announcement">×</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-@st.cache_data
-def set_background(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
-    st.markdown(
-        f"""
+    # JavaScript to handle the close button click
+    js_code = """
+    document.getElementById('close-announcement').addEventListener('click', function() {
+        this.parentElement.parentElement.style.display = 'none';
+    });
+    """
+    st_javascript(js_code)
+
+def set_background(image_file, is_gif=False):
+    with open(image_file, "rb") as f:
+        img_data = f.read()
+    b64_encoded = base64.b64encode(img_data).decode()
+    img_type = "gif" if is_gif else "png"
+    style = f"""
         <style>
         .stApp {{
-            background-image: url(data:image/png;base64,{encoded_string});
+            background-image: url(data:image/{img_type};base64,{b64_encoded});
             background-size: cover;
+            background-attachment: fixed;
         }}
         </style>
-        """,
-        unsafe_allow_html=True
-    )
+    """
+    st.markdown(style, unsafe_allow_html=True)
 
 def display_contact_form():
     """Displays the contact form."""
-    with st.form("contact_form"):  # Remove the key argument here
+    with st.form("contact_form"): 
         name = st.text_input("Name", key="name_input")
         email = st.text_input("Email", key="email_input")
         message = st.text_area("Message", key="message_input")
@@ -78,6 +92,12 @@ def display_contact_form():
                 st.success("Thanks for your message! I'll get back to you soon.")
             else:
                 st.warning("Please fill in all fields before submitting.")
+
+def get_resume_file_path(role, document_type):
+    """Returns the file path for the resume or cover letter based on the role."""
+    file_type = "resume" if document_type == "Resume" else "cover_letter"
+    file_path = os.path.join("resume", f"{role.lower().replace(' ', '_')}_{file_type}.pdf")
+    return file_path
 
 def display_resume_section(role):
     """Displays the Resume/Cover Letter section."""
@@ -89,8 +109,7 @@ def display_resume_section(role):
         key="document_choice"
     )
     
-    file_type = "resume" if document_choice == "Resume" else "cover_letter"
-    file_path = os.path.join("resume", f"{role.lower().replace(' ', '_')}_{file_type}.pdf")
+    file_path = get_resume_file_path(role, document_choice)
     file_label = f"{role} {document_choice}"
     
     try:
@@ -120,17 +139,4 @@ def contact_section(role):
     # Display the resume/cover letter section
     display_resume_section(role)
 
-st.markdown(
-    """
-    <style>
-        .contact-section {
-            background-color: #f0f0f0;
-            padding: 20px;
-            border-radius: 5px;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("<h2 class='contact-section'>Contact</h2>", unsafe_allow_html=True)
+st.markdown(f"<link rel='stylesheet' href='style.css'>", unsafe_allow_html=True)

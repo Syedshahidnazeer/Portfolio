@@ -1,58 +1,276 @@
-/* Base styles */
+/* ... your existing styles ... */
 body {
-    color: #333333;
-    background-color: #ffffff;
-    font-family: 'Arial', sans-serif; /* Or any font you prefer */
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
 }
 
-.landing-page {
+h1, h2, h3, h4, h5, h6 {
+    color: #222;
+    margin-bottom: 10px;
+}
+
+p {
+    line-height: 1.6;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.stApp .st-bf {
+    padding: 0 !important; /* Remove default padding */
+    margin-top: 0 !important; /* Remove default margin */
+}
+
+/* Style for the main menu (st.selectbox) */
+.stSelectbox {
+    /* Style the selectbox as you like */
+    width: 100%;
+    max-width: 300px;
+    margin: 1rem auto;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+/* Navigation Bar Styling */
+.navbar {
+    background-color: #333333; /* Example background color */
+    padding: 10px;
+    position: fixed; /* Make the navbar fixed */
+    top: 0; /* Position it at the top */
+    width: 100%;
+    z-index: 100; /* Ensure it's on top of other content */
+}
+
+.navbar-item {
+    display: inline-block;
+    margin: 0 10px;
+    color: white; /* Example text color */
+    text-decoration: none;
+    transition: all 0.3s ease; /* Add transition for hover effect */
+}
+
+.navbar-item:hover {
+    color: #4CAF50; /* Example hover color */
+}
+
+/* Animation for the navbar on hover */
+.navbar-item.navbar-hover {
+    animation: navbar-hover-animation 0.3s ease;
+}
+
+@keyframes navbar-hover-animation {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Content Area Styling */
+.content-area {
+    padding-top: 70px; /* Add padding to account for the navbar height */
+    padding-bottom: 2rem;
+}
+
+/* Remove top padding from the main container */
+.main .block-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Force content to start at the top */
+[data-testid="stAppViewContainer"] > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Ensure navigation bars are visible */
+[data-testid="stToolbar"] {
+    visibility: visible !important;
+    height: auto !important;
+    opacity: 1 !important;
+}
+
+/* Adjust header padding */
+.stApp header {
+    padding-top: 0 !important;
+}
+
+/* Announcement Styling */
+.announcement-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    animation: fadeOut 3s ease-in-out forwards;
+}
+
+.announcement-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to right, #007bff, #00c698, #00c698, #007bff);
+    animation: shine 2s linear infinite;
+    z-index: -1;
+}
+
+.announcement-content {
     display: flex;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-image: url('your_background_image.jpg'); /* Replace with your image */
-    background-size: cover;
-    background-position: center;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.content {
-    text-align: center;
+.announcement-text {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.announcement-close {
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.announcement-close:hover {
+    color: #007bff;
+}
+
+/* Animations */
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+@keyframes shine {
+    0% { background-position: 0 0; }
+    100% { background-position: 100% 0; }
+}
+
+/* Project Card Styling */
+.project-card {
+    position: relative;
+    background-color: #fff;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
-.big-font {
-    font-size: 3rem;
+.project-card .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.project-card:hover .overlay {
+    opacity: 1;
+}
+
+.project-card h3 {
+    font-size: 24px;
     font-weight: bold;
 }
 
-.medium-font {
-    font-size: 1.5rem;
+/* Contact Form Styling */
+.contact-section {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
 }
 
-.role-options {
+/* Additional Styling */
+.skill-tag {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.responsive-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
 }
 
-.role-item {
-    padding: 10px 20px;
-    margin: 0 10px;
-    background-color: #f0f0f0;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+/* Compact layout adjustments */
+.stSelectbox {
+    margin-bottom: 0.5rem !important;
 }
 
-.role-item:hover {
-    background-color: #e0e0e0;
+.stTabs {
+    margin-top: -0.5rem !important;
 }
 
-/* Styles for mobile devices */
+.css-12oz5g7, .css-1d391kg {
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
+}
+
+/* Reduce space between sections */
+.stApp > div > div > div > div {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+.nav-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Remove any gap between the navbars */
+}
+
+/* Ensure the nav bars are flush against each other */
+.nav-bar-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Responsive Styles for Network Graphs */
 @media (max-width: 768px) {
-    /* ... (Your mobile styles) ... */
+    .network-graph {
+        width: 100%; 
+        height: 400px; /* Adjust height as needed */
+    }
 }

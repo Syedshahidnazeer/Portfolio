@@ -174,3 +174,4 @@ def create_project_network():
     # Save and display the graph
     net.save_graph("project_network.html")
     st.components.v1.html(open("project_network.html", 'r').read(), height=650)
+    

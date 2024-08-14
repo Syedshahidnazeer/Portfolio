@@ -1,4 +1,3 @@
-# Standard library imports
 import os
 import time
 import tempfile
@@ -22,6 +21,7 @@ from pyvis.network import Network
 from streamlit_option_menu import option_menu
 from streamlit_lottie import st_lottie
 import google.generativeai as genai
+import hydralit_components as hc
 
 # Streamlit imports
 import streamlit as st
@@ -44,16 +44,77 @@ from skills import get_skills_data
 st.set_page_config(
     page_title="Syed Shahid Nazeer - Portfolio",
     layout="wide",
-    initial_sidebar_state="expanded",)
-    # Example usage
+    initial_sidebar_state="expanded",
+)
+
+def load_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+load_css('styles.css')
 
 def main():
+    st.markdown(
+        """
+        <style>
+            # --- Indian Flag Particle Animation CSS ---
+        body {
+            background: linear-gradient(to right, #f7f7f7, #e7e7e7);
+            overflow: hidden;  /* Ensure particles don't cause scrollbars */
+            margin: 0;  /* Remove default margin */
+            padding: 0;  /* Remove default padding */
+        }
+        .particle {
+            position: absolute;
+            background-image: url('https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg');  /* Indian flag image */
+            background-size: cover;
+            width: 30px;
+            height: 20px;
+            opacity: 0.8;
+            animation: particleAnimation 10s linear infinite;
+        }
+        @keyframes particleAnimation {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        .big-font {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;  /* Remove default margin */
+            padding: 0;  /* Remove default padding */
+        }
+        .medium-font {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 0;  /* Remove default margin */
+            padding: 0;  /* Remove default padding */
+        }
+        .small-font {
+            font-size: 1rem;
+            text-align: center;
+            margin: 0;  /* Remove default margin */
+            padding: 0;  /* Remove default padding */
+        }
+        h1 {
+            margin-bottom: 0.5rem;  /* Reduce the bottom margin */
+        }
+        h2 {
+            margin-bottom: 0.5rem;  /* Reduce the bottom margin */
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    display_page_with_indian_flag_animation("Home")
-    
+    # --- Create Indian Flag Particles ---
+    for _ in range(20):
+        st.markdown(
+            f'<div class="particle" style="left: {random.randint(0, 100)}vw; top: {random.randint(0, 100)}vh;"></div>',
+            unsafe_allow_html=True,
+        )
     show_announcement("🎉 New feature alert: Thesis Writer Assistant now available!")
-
-    # Role Selection
+    # --- Role Selection ---
     role = option_menu(
         menu_title=None,
         options=["Data Analyst", "Data Scientist", "Python Developer"],
@@ -73,7 +134,7 @@ def main():
     # Update session state with the selected role
     st.session_state.selectedRole = role
 
-    # Set Background
+    # --- Set Background ---
     background_images = {
         "Data Analyst": "data_analyst_bg.jpg",
         "Data Scientist": "data_scientist_bg.jpg",
@@ -82,7 +143,7 @@ def main():
     background_image = background_images.get(role, "default_bg.jpg")
     set_background(background_image)
 
-    # Main Navigation
+    # --- Main Navigation ---
     selected = option_menu(
         menu_title=None,
         options=["Home", "Skills", "Projects", "Contact", "Chat Bot"],
@@ -104,6 +165,12 @@ def main():
         },
         key="main_menu"
     )
+    # --- Content Area ---
+    st.markdown('<div class="content-area">', unsafe_allow_html=True)
+    # Update session state with the selected role
+    st.session_state.selectedRole = role
+
+
 
     if selected == "Home":
         role_descriptions = {
@@ -149,7 +216,11 @@ def main():
         st.header(f"Skills & Expertise - {role}")
 
         # Get skills data from skills.py
-        skills = get_skills_data(role)
+        @st.cache_data
+        def get_cached_skills_data(role):
+            return get_skills_data(role)
+
+        skills = get_cached_skills_data(role)
         skills_data = skills["skills_data"]
         additional_skills = skills["additional_skills"]
 
@@ -170,21 +241,24 @@ def main():
         st.header(f"Projects - {role}")
         st.subheader("Explore My Work")
 
-        projects = get_projects(role)
+        @st.cache_data
+        def get_cached_projects(role):
+            return get_projects(role)
 
-        for project, description in projects.items():
+        projects = get_cached_projects(role)
+
+        def display_project_card(project, description, image_file):
             col1, col2 = st.columns([1, 3])
             with col1:
                 with st.container():
                     st.markdown(f'<div class="project-card">', unsafe_allow_html=True)
 
-                    image_file = f"{project.lower().replace(' ', '_')}.jpg"
                     image_path = os.path.join("project_images", image_file)
-
                     if os.path.exists(image_path):
                         st.image(image_path, use_column_width=True)
                     else:
                         st.warning(f"Image not found: {image_path}")
+                        st.image("default_project_image.jpg", use_column_width=True)  # Replace with your default image
 
                     st.markdown(f'<div class="overlay"><h3>{project}</h3></div>', unsafe_allow_html=True)
                     st.markdown('</div>', unsafe_allow_html=True)
@@ -195,12 +269,15 @@ def main():
                     st.subheader(project)
                     with st.expander("See Details"):
                         st.write(description)
-                        st.write("[Link to Project Repo/Demo]")  # Replace with actual link
+                        st.write(f"[Link to {project} Repo/Demo]")  # Add actual links
                     st.markdown('</div>', unsafe_allow_html=True)
 
-        # Create and display the project network graph
-        create_project_network() 
+        for project, description in projects.items():
+            image_file = f"{project.lower().replace(' ', '_')}.jpg"
+            display_project_card(project, description, image_file)
 
+        # Display the project network graph
+        create_project_network()
     elif selected == "Contact":
         contact_section(role)
     elif selected == "Chat Bot":
@@ -214,6 +291,16 @@ def main():
         background_type = st.selectbox("Choose background type", ["Static", "Dynamic"], key="background_select")
         if background_type == "Dynamic":
             set_background("background.gif", is_gif=True)
-
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 if __name__ == "__main__":
     main()
+
+You’re an experienced web developer specializing in Streamlit, HTML, and CSS, with over 10 years of hands-on experience in building dynamic web applications. You excel at creating responsive and user-friendly interfaces, ensuring that the applications you develop are not only functional but also aesthetically pleasing and accessible.
+Your task is to create a basic web application prototype using Streamlit that showcases my project. Here are the details of the project I want you to implement:
+Project Title: Streamlit Portfolio Site
+Project Description: A Full Fledged Portfolio Website Of An Data Analyst, Data Scientist, Python Developer
+Key Features: Agile and Mobile Friendly
+Target Audience: HR'S,Data Analyst's, Data Scientist's, Python Developer's
+While creating the prototype, please ensure that the layout is simple, intuitive, and incorporates best practices in HTML and CSS for styling. Make sure to include comments to explain key sections of the code and keep in mind any specific functionalities I want to be highlighted.
+For guidance on how I prefer the layout, please ensure that the homepage contains a navigation bar, a main content section that highlights the key features, and a footer with contact information.

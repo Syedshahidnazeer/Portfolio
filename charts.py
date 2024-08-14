@@ -10,7 +10,11 @@ def create_chart(data, chart_type, title=None, x=None, y=None, **kwargs):
         'line': px.line,
         'pie': px.pie,
         'scatter': px.scatter,
-        'line_polar': px.line_polar
+        'line_polar': px.line_polar,
+        'histogram': px.histogram,  # Add histogram chart type
+        'box': px.box,  # Add box plot chart type
+        'violin': px.violin,  # Add violin plot chart type
+        'scatter_3d': px.scatter_3d,  # Add 3D scatter chart type
     }
 
     chart_func = chart_functions.get(chart_type)

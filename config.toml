@@ -1,28 +1,15 @@
 [theme]
-primaryColor = "#F63366"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#262730"
-font = "sans serif"
-
-[server]
-headless = true
-port = 8501
-enableCORS = false
-enableXsrfProtection = true
-
-[client]
-showErrorDetails = false
-showWarningOnDirectExecution = true
-
-[logger]
-level = "info"
-format = "%(asctime)s.%(msecs)03d %(message)s"
-dateFormat = "%Y-%m-%d %H:%M:%S"
-
-[runner]
-magicEnabled = true
-installTracer = false
-
-[deprecation]
-showfileUploaderEncoding = false
+primaryColor = "#F63366" # Vibrant pink-ish
+backgroundColor = "#FFFFFF" # White
+secondaryBackgroundColor = "#f0f0f0" # Light gray
+textColor = "#262730" # Dark gray
+font = "Arial"
+successColor = "#4CAF50" # Green 
+warningColor = "#FFD700" # Gold
+errorColor = "#DC3545" # Red
+infoColor = "#007bff" # Light blue
+codeColor = "#e91e63"
+headerColor = "#f8f9fa"
+headerFont = "Roboto"
+headerFontSize = "2rem"
+buttonColor = "#007bff" # Light blue
