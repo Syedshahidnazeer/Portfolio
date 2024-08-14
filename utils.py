@@ -5,7 +5,6 @@ import uuid
 import base64
 from fpdf import FPDF
 import os
-from streamlit_javascript import st_javascript
 
 @st.cache_data
 def load_lottieurl(url: str):
@@ -55,14 +54,6 @@ def show_announcement(message):
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # JavaScript to handle the close button click
-    js_code = """
-    document.getElementById('close-announcement').addEventListener('click', function() {
-        this.parentElement.parentElement.style.display = 'none';
-    });
-    """
-    st_javascript(js_code)
 
 def set_background(image_file, is_gif=False):
     with open(image_file, "rb") as f:
