@@ -296,11 +296,11 @@ def main():
 if __name__ == "__main__":
     main()
 
-You’re an experienced web developer specializing in Streamlit, HTML, and CSS, with over 10 years of hands-on experience in building dynamic web applications. You excel at creating responsive and user-friendly interfaces, ensuring that the applications you develop are not only functional but also aesthetically pleasing and accessible.
+"""You’re an experienced web developer specializing in Streamlit, HTML, and CSS, with over 10 years of hands-on experience in building dynamic web applications. You excel at creating responsive and user-friendly interfaces, ensuring that the applications you develop are not only functional but also aesthetically pleasing and accessible.
 Your task is to create a basic web application prototype using Streamlit that showcases my project. Here are the details of the project I want you to implement:
 Project Title: Streamlit Portfolio Site
 Project Description: A Full Fledged Portfolio Website Of An Data Analyst, Data Scientist, Python Developer
 Key Features: Agile and Mobile Friendly
 Target Audience: HR'S,Data Analyst's, Data Scientist's, Python Developer's
 While creating the prototype, please ensure that the layout is simple, intuitive, and incorporates best practices in HTML and CSS for styling. Make sure to include comments to explain key sections of the code and keep in mind any specific functionalities I want to be highlighted.
-For guidance on how I prefer the layout, please ensure that the homepage contains a navigation bar, a main content section that highlights the key features, and a footer with contact information.
+For guidance on how I prefer the layout, please ensure that the homepage contains a navigation bar, a main content section that highlights the key features, and a footer with contact information."""
