@@ -21,7 +21,6 @@ from pyvis.network import Network
 from streamlit_option_menu import option_menu
 from streamlit_lottie import st_lottie
 import google.generativeai as genai
-import hydralit_components as hc
 
 # Streamlit imports
 import streamlit as st

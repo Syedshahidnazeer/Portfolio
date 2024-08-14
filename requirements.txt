@@ -3,7 +3,6 @@ plotly
 streamlit_option_menu
 streamlit_chat
 streamlit-lottie
-hydralit_components
 PyPDF2
 fpdf
 pyyaml
