@@ -258,7 +258,7 @@ def main():
     selected_message = random.choice(list(messages.values()))
 
     # Encode the video file
-    encoded_video = encode_video("independence day.mp4")
+    encoded_video = encode_video("Independence day.mp4")
 
     # Display the video
     show_video(encoded_video)
