@@ -7,6 +7,7 @@ from utils import load_lottieurl, display_lottie
 from streamlit_option_menu import option_menu
 from streamlit_lottie import st_lottie
 import json
+from fpdf import FPDF
 import time
 import PyPDF2 as pdf
 import re

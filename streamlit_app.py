@@ -20,6 +20,7 @@ import PyPDF2 as pdf
 import yaml
 from pyvis.network import Network
 from streamlit_option_menu import option_menu
+import hydralit_components as hc
 from streamlit_lottie import st_lottie
 import google.generativeai as genai
 
@@ -30,16 +31,17 @@ import streamlit as st
 from chatbots import (thesis_writer_assistant, resume_ats_score_bot,
                       code_explainer_bot, healerbeast_bff, qanda_bot,
                       transcription_bot, chatbot)
-from utils import (load_lottieurl, display_lottie, display_pdf,
+from utils import (load_lottieurl, display_lottie, display_pdf,local_css,
                    get_binary_file_downloader_html, show_announcement,show_video,
                    set_background, contact_section, display_resume_section)
 from charts import (create_chart, create_education_chart, display_work_experience,
                     create_skills_chart, create_project_impact_chart,
                     create_radar_chart, create_bar_chart, create_heatmap_chart)
 from networks import create_skills_network, create_project_network
-from css import apply_indian_flag_animation_style,create_indian_flag_particles
 from projects import get_projects
 from skills import get_skills_data
+from analysis import data_analysis_page
+from science import data_science_page
 
 
 def display_home_section(role):
@@ -64,27 +66,43 @@ def display_home_section(role):
         'Skill': ['Python', 'SQL', 'Data Viz', 'Machine Learning', 'Communication'],
         'Proficiency': [90, 85, 95, 80, 75]
     })
-    radar_chart = create_chart(skills_data,
-                               'line_polar',
-                               title="Technical Skill Proficiency",
-                               theta='Skill',
-                               line_close=True)
-    radar_chart.update_traces(fill='toself')
-    st.plotly_chart(radar_chart, use_container_width=True)
+
+    # Create the radar chart
+    fig = px.line_polar(
+        skills_data,
+        r='Proficiency',
+        theta='Skill',
+        line_close=True,
+        title="Technical Skill Proficiency"
+    )
+
+    # Customize the chart
+    fig.update_traces(fill='toself')
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 100]
+            )
+        )
+    )
+
+    # Display the chart in Streamlit
+    st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("My Journey (Animated)")
     display_work_experience()
 
     st.write("Let's connect! Choose your preferred platform:")
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
+
     with col1:
-        st.markdown(
-            "[Visit my LinkedIn Profile](https://www.linkedin.com/in/yourprofile)"
-        )
+        st.image("images/linkedin_logo.png", width=600)
+        st.markdown("[LinkedIn Profile](https://www.linkedin.com/in/shahidnazeersyed/)")
+
     with col2:
-        st.markdown("[Check out my GitHub](https://github.com/yourusername)")
-    with col3:
-        st.markdown("[Follow me on Twitter](https://twitter.com/yourhandle)")
+        st.image("images/github_logo.png", width=700)
+        st.markdown("[GitHub Profile](https://github.com/Syedshahidnazeer)")
 
 
 def display_skills_section(role):
@@ -92,16 +110,16 @@ def display_skills_section(role):
 
     @st.cache_data
     def get_cached_skills_data(role):
-        return get_skills_data(role)
+        return get_skills_data(role)  # Use your get_skills_data function
 
     skills = get_cached_skills_data(role)
     skills_data = skills["skills_data"]
     additional_skills = skills["additional_skills"]
 
-    radar_chart = create_radar_chart(skills_data, "Data Scientist")
+    radar_chart = create_radar_chart(skills_data, role)
     st.plotly_chart(radar_chart, use_container_width=True)
 
-    bar_chart = create_bar_chart(skills_data, "Data Scientist")
+    bar_chart = create_bar_chart(skills_data, role)  # Pass the 'role' parameter
     st.plotly_chart(bar_chart, use_container_width=True)
 
     st.subheader("Additional Skills")
@@ -113,8 +131,33 @@ def display_skills_section(role):
 
 
 def display_projects_section(role):
+
     st.header(f"Projects - {role}")
     st.subheader("Explore My Work")
+    # Custom CSS for animations and styling
+    st.markdown("""
+    <style>
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .project-card {
+        animation: fadeIn 0.5s ease-in;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    .project-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     @st.cache_data
     def get_cached_projects(role):
@@ -123,96 +166,139 @@ def display_projects_section(role):
     projects = get_cached_projects(role)
 
     def display_project_card(project, description, image_file):
-        # ... (Code for project card remains the same)
+        """Displays a project card with an image overlay and description."""
+        col1, col2 = st.columns([1, 3])
 
-        for project, description in projects.items():
-            image_file = f"{project.lower().replace(' ', '_')}.jpg"
-            display_project_card(project, description, image_file)
+        with col1:
+            with st.container():
+                st.markdown(
+                    f'<div class="project-card">',
+                    unsafe_allow_html=True,
+                )
+
+                image_path = os.path.join("project_images", image_file)
+
+                if os.path.exists(image_path):
+                    st.image(image_path, use_column_width=True)
+                else:
+                    st.warning(f"Image not found: {image_path}")
+
+                # Add overlay with project title
+                st.markdown(
+                    f'<div class="overlay"><h3>{project}</h3></div>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown("</div>", unsafe_allow_html=True)
+
+        with col2:
+            with st.container():
+                st.markdown(
+                    f'<div class="project-card">',
+                    unsafe_allow_html=True,
+                )
+                with st.expander("See Details"):
+                    st.write(description)
+                    st.write("[Link to Project Repo/Demo]")  # Replace with actual link
+                st.markdown("</div>", unsafe_allow_html=True)
+
+    # Call display_project_card for each project (outside the function definition)
+    for project, description in projects.items():
+        image_file = f"{project.lower().replace(' ', '_')}.jpg"
+        display_project_card(project, description, image_file) 
 
     create_project_network()
-# Define your dictionary of messages
-messages = {
-    "welcome": "Welcome to my Digital Realm! Dive into the world of Data Insights, Tech Innovations, and Software Mastery.",
-    "update": "New Feature: Interactive AI! Engage with an intelligent assistant for tech insights and more!",
-    "reminder": "Don't forget to check out our latest projects and updates!",
-    "announcement": "Big News! We're launching a new series of tutorials next week. Stay tuned!"
-}
+messages = [
+    "Welcome to my Digital Realm!",
+    "Explore my latest projects and skills!",
+    "Don't forget to check out the Chat Bot!",
+    "Thanks for visiting my portfolio!"
+]
 
 def main():
-    st.set_page_config(page_title="SYED SHAHID NAZEER - Portfolio",
-                       layout="wide")
-
-    st.markdown("""
-<style>
-    body {
-        background-color: #1a1a2e;
-        color: #ff00ff; /* Set default text color to pink */
-    }
-    .stApp {
-        max-width: 100%;
-    }
-    .stButton>button {
-        background-color: #00ffff;
-        color: #1a1a2e;
-        border: 2px solid #ff00ff;
-        border-radius: 5px;
-        transition: all 0.3s ease;
-    }
-    .stButton>button:hover {
-        background-color: #ff00ff;
-        color: #00ffff;
-        border-color: #00ffff;
-        box-shadow: 0 0 15px #ff00ff;
-    }
-    /* Apply neon effect to navbars */
-    .option-menu .nav-link {
-        text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff; /* Pink neon glow */
-        transition: all 0.3s ease;
-    }
-    .option-menu .nav-link:hover,
-    .option-menu .nav-link-selected {
-        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; /* Cyan neon glow */
-    }
-    .option-menu .nav-link-selected {
-        background-color: #331a4d; /* Dark purple background for selected item */
-    }
-</style>
-""", unsafe_allow_html=True)
-
+    st.set_page_config(
+        page_title="SYED SHAHID NAZEER - Portfolio",
+        page_icon=":bar_chart:",  # Add an icon
+        layout="wide",
+        initial_sidebar_state="collapsed"  # or "expanded"
+    )
     st.markdown(
         """
-        <link rel="stylesheet" href="styles.css">
+        <style>
+            body {
+                background-color: #1f1f1f; /* Dark background */
+                color: #ffffff; /* White text for general content */
+            }
+            h1, h2, h3, h4, h5, h6, p { /* Target headings and paragraphs */
+                color: black;
+            }
+            .stApp {
+                max-width: 100%; 
+            }
+            .stButton > button {
+                background-color: #7400b8;  /* Purple button */
+                color: white;
+                border: none;
+                border-radius: 5px; 
+                transition: all 0.3s ease; 
+            }
+            .stButton>button:hover {
+                background-color: #ffffff; /* White on hover */
+                color: #7400b8; 
+                box-shadow: 0 0 10px #7400b8; /* Purple glow */
+            }
+            .skill-tag { 
+                background-color: #7400b8;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                margin-right: 5px;
+            } 
+            /* ... Add more styles as needed ... */
+        </style>
         """,
         unsafe_allow_html=True,
     )
+    # Custom CSS for styling
+    st.markdown(
+        """
+    <style>
+        .stApp {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+        }
+        .stButton>button {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid white;
+        }
+        .stButton>button:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
 
-    role = option_menu(menu_title=None,
-                       options=["Data Analyst", "Data Scientist",
-                                "Python Developer"],
-                       icons=["bar-chart-fill", "gear-fill", "code-slash"],
-                       menu_icon="cast",
-                       default_index=0,
-                       orientation="horizontal",
-                       styles={
-                           "container": {
-                               "padding": "0!important",
-                               "background-color": "rgba(250, 250, 250, 0.8)"
-                           },
-                           "icon": {
-                               "color": "orange",
-                               "font-size": "calc(16px + 0.5vw)"
-                           },
-                           "nav-link": {
-                               "font-size": "calc(14px + 0.5vw)",
-                               "text-align": "left",
-                               "margin": "0px",
-                               "--hover-color": "#eee"
-                           },
-                           "nav-link-selected": {
-                               "background-color": "#02ab21"
-                           },
-                       })
+    # Role Selection
+    role_options = [
+        {"icon": "bar-chart", "label": "Data Analyst"},
+        {"icon": "graph-up", "label": "Data Scientist"},
+        {"icon": "code-slash", "label": "Python Developer"}
+    ]
 
+    role = hc.option_bar(
+        option_definition=role_options,
+        override_theme={
+            "background": "rgba(255,255,255,0.1)",
+            "base": "light",
+            "primaryColor": "#4b6cb7",
+            "secondaryColor": "#182848",
+            "font": "sans serif",
+        },
+        key="role_selector"
+    )
+
+    # Background Setting
     background_images = {
         "Data Analyst": "data_analyst_bg.jpg",
         "Data Scientist": "data_scientist_bg.jpg",
@@ -220,53 +306,50 @@ def main():
     }
     set_background(background_images[role])
 
-    selected = option_menu(menu_title=None,
-                       options=["Home", "Skills", "Projects", "Contact",
-                                "Chat Bot"],
-                       icons=["house", "gear", "code-slash", "envelope",
-                              "chat-dots"],
-                       menu_icon="cast",
-                       default_index=0,
-                       orientation="horizontal",
-                       styles={
-                           "container": {
-                               "padding": "0!important",
-                               "background-color": "rgba(250, 250, 250, 0.8)"
-                           },
-                           "icon": {
-                               "color": "orange",
-                               "font-size": "calc(16px + 0.5vw)"
-                           },
-                           "nav-link": {
-                               "font-size": "calc(14px + 0.5vw)",
-                               "text-align": "left",
-                               "margin": "0px",
-                               "--hover-color": "#eee"
-                           },
-                           "nav-link-selected": {
-                               "background-color": "#02ab21"
-                           },
-                       })
+    # Navigation
+    nav_options = [
+        {"icon": "gear", "label": "Skills"},
+        {"icon": "code-slash", "label": "Projects"},
+        {"icon": "envelope", "label": "Contact"},
+        {"icon": "chat-dots", "label": "Chat Bot"},
+        {"icon": "bar-chart-line", "label": "Data Analysis"},
+        {"icon": "database", "label": "Data Science"}
+    ]
 
-    # Function to encode video file to base64
+    selected = hc.nav_bar(
+        menu_definition=nav_options,
+        override_theme={
+            "background": "rgba(255,255,255,0.1)",
+            "base": "light",
+            "primaryColor": "#4b6cb7",
+            "secondaryColor": "#182848",
+            "font": "sans serif",
+        },
+        home_name="Home",
+        sticky_nav=True,
+        hide_streamlit_markers=True,
+        sticky_mode="pinned",
+        use_animation=True,
+        key="main_nav"
+    )
+    with hc.HyLoader("Loading...", hc.Loaders.pacman):
+        # Your code here
+        time.sleep(2)
+
+    # --- Function to encode video file to base64 ---
     def encode_video(video_path):
         with open(video_path, "rb") as video_file:
             video_bytes = video_file.read()
         return base64.b64encode(video_bytes).decode()
-
-    # Select a random message from the dictionary
-    selected_message = random.choice(list(messages.values()))
-
-    # Encode the video file
+    # --- Encode the video file ---
     encoded_video = encode_video("Independence day.mp4")
 
-    # Display the video
+    # --- Display the video ---
     show_video(encoded_video)
 
-    # Display the announcement
-    show_announcement(selected_message)
+    show_announcement(messages)
 
-    # Remove extra container and display selected section directly
+    # --- Section Rendering ---
     if selected == "Home":
         display_home_section(role)
     elif selected == "Skills":
@@ -274,19 +357,41 @@ def main():
     elif selected == "Projects":
         display_projects_section(role)
     elif selected == "Contact":
+        local_css("contacts.css")
         contact_section(role)
     elif selected == "Chat Bot":
         chatbot()
+    elif selected == "Data Analysis":
+        data_analysis_page()
+    elif selected == "Data Science":
+        data_science_page()
 
+    # --- Footer ---
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         st.write("© 2024 Syed Shahid Nazeer")
     with col2:
-        background_type = st.selectbox("Choose background type",
-                                       ["Static", "Dynamic"],
-                                       key="background_select")
+        background_type = st.selectbox("Choose background type", ["Static", "Dynamic"], key="background_select")
         if background_type == "Dynamic":
             set_background("background.gif", is_gif=True)
+
+# Check if the user is on a mobile device
+is_mobile = st.query_params.get("mobile", ["false"])[0] == "true"
+
+# Adjust layout based on device
+if is_mobile:
+    st.markdown("""
+    <style>
+        .stApp {
+            padding: 1rem;
+        }
+        .stButton>button {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 if __name__ == "__main__":
     main()

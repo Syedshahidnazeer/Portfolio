@@ -5,6 +5,11 @@ import uuid
 import base64
 from fpdf import FPDF
 import os
+import pandas as pd
+from io import BytesIO
+from datetime import datetime
+from itertools import cycle
+import json
 
 @st.cache_data
 def load_lottieurl(url: str):
@@ -25,24 +30,10 @@ def display_lottie(url, height=200, key=None):
     else:
         st.warning("Failed to load Lottie animation. Please check the URL.")
 
-@st.cache_data
-def display_pdf(file_path):
-    """Displays a PDF file using st.components.v1."""
-    with open(file_path, "rb") as f:
-        pdf_data = f.read()
-    base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
-    pdf_display = f"""
-    <embed src="data:application/pdf;base64,{base64_pdf}" type="application/pdf" width="700" height="1000" />
-    """
-    st.components.v1.html(pdf_display, height=1000)
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-@st.cache_data
-def get_binary_file_downloader_html(file_path, file_label):
-    with open(file_path, 'rb') as f:
-        data = f.read()
-    bin_str = base64.b64encode(data).decode()
-    href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(file_path)}">Download {file_label}</a>'
-    return href
 def show_video(video_file):
     """Displays a video."""
     st.markdown(f"""
@@ -82,42 +73,68 @@ def show_video(video_file):
         }}
     }}
     </style>
-    """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)    
+    
+    
+def show_announcement(messages):
+    """Displays an animated announcement with scrolling messages and Peter Griffin GIF."""
+    gif_path = "images/Peter Griffin Dancing.gif"  # Make sure this path is correct
+    
+    messages_cycle = cycle(messages)
+    # Read and encode the GIF file
+    with open(gif_path, "rb") as gif_file:
+        gif_data = gif_file.read()
+        gif_base64 = base64.b64encode(gif_data).decode("utf-8")
 
-def show_announcement(message):
-    """Displays an animated announcement with a close button."""
-    st.markdown(f"""
+    messages_json = json.dumps(messages)
+    st.markdown(
+        f"""
     <div class="announcement-container">
+        <img src="data:image/gif;base64,{gif_base64}" alt="Peter Griffin GIF" class="peter-gif"> 
         <div class="announcement-content">
-            <div class="announcement-text">{message}</div>
-            <div class="announcement-close" id="close-announcement">×</div>
+            <div class="announcement-text" id="scrolling-text"></div> 
         </div>
+        <div class="announcement-close" id="close-announcement">×</div>
     </div>
 
     <style>
     .announcement-container {{
         position: relative;
-        padding: 10px; /* Reduced padding */
-        margin: 10px 0; /* Reduced margin */
-        background: rgba(255, 165, 0, 0.8); /* Orange background */
-        border-radius: 10px;
-        animation: slide-in 1s ease-out, pulse 2s infinite;
+        padding: 15px;
+        margin: 15px 0;
+        background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        border-radius: 15px;
+        animation: slide-in 1s ease-out, gradient-shift 10s infinite;
         text-align: center;
+        overflow: hidden;
+    }}
+    .peter-gif {{
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
     }}
     .announcement-content {{
+        margin-left: 70px;
         position: relative;
         z-index: 1;
     }}
+    .announcement-container {{
+        /* ... (rest of your existing CSS) ... */
+    }}
     .announcement-text {{
-        font-size: 1.2em; /* Reduced font size */
+        font-size: 1.3em;
         color: white;
-        text-shadow: 0 0 10px #00ffff;
     }}
     .announcement-close {{
         position: absolute;
-        top: 5px; /* Adjusted position */
-        right: 5px; /* Adjusted position */
-        font-size: 1.2em; /* Reduced font size */
+        top: 5px;
+        right: 10px;
+        font-size: 1.5em;
         cursor: pointer;
         transition: transform 0.3s;
     }}
@@ -125,119 +142,52 @@ def show_announcement(message):
         transform: scale(1.2);
     }}
     @keyframes slide-in {{
-        from {{
-            transform: translateY(-100%);
-            opacity: 0;
-        }}
-        to {{
-            transform: translateY(0);
-            opacity: 1;
-        }}
-    }}
-    @keyframes pulse {{
-        0% {{ transform: scale(1); }}
-        50% {{ transform: scale(1.05); }}
-        100% {{ transform: scale(1); }}
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-def show_announcement(message):
-    """Displays an animated announcement with a close button and a GIF."""
-    gif_url = "https://media.tenor.com/2k1Xz1z7yXgAAAAC/bh187-family-guy-peter-griffin-suss.gif"
-    st.markdown(f"""
-    <div class="announcement-container">
-        <div class="announcement-content">
-            <div class="announcement-text">{message}</div>
-            <div class="announcement-gif">
-                <img src="{gif_url}" alt="Announcement GIF">
-            </div>
-            <div class="announcement-close" id="close-announcement">×</div>
-        </div>
-    </div>
-
-    <style>
-    .announcement-container {{
-        position: relative;
-        padding: 10px; /* Reduced padding */
-        margin: 10px 0; /* Reduced margin */
-        background: linear-gradient(90deg, #ff7e5f, #feb47b); /* Gradient background */
-        border-radius: 10px;
-        animation: slide-in 1s ease-out, gradient-shift 5s infinite;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }}
-    .announcement-content {{
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }}
-    .announcement-text {{
-        font-size: 1.2em; /* Reduced font size */
-        color: white;
-        text-shadow: 0 0 10px #00ffff;
-        flex: 1;
-    }}
-    .announcement-gif {{
-        flex: 0 0 auto;
-        margin-left: 10px;
-    }}
-    .announcement-gif img {{
-        width: 50px; /* Adjust size as needed */
-        height: auto;
-        border-radius: 5px;
-        animation: bounce 2s infinite; /* Add bounce animation */
-    }}
-    .announcement-close {{
-        position: absolute;
-        top: 5px; /* Adjusted position */
-        right: 5px; /* Adjusted position */
-        font-size: 1.2em; /* Reduced font size */
-        cursor: pointer;
-        transition: transform 0.3s;
-    }}
-    .announcement-close:hover {{
-        transform: scale(1.2);
-    }}
-    @keyframes slide-in {{
-        from {{
-            transform: translateY(-100%);
-            opacity: 0;
-        }}
-        to {{
-            transform: translateY(0);
-            opacity: 1;
-        }}
+        from {{ transform: translateY(-100%); opacity: 0; }}
+        to {{ transform: translateY(0); opacity: 1; }}
     }}
     @keyframes gradient-shift {{
-        0% {{
-            background: linear-gradient(90deg, #ff7e5f, #feb47b);
-        }}
-        50% {{
-            background: linear-gradient(90deg, #6a11cb, #2575fc);
-        }}
-        100% {{
-            background: linear-gradient(90deg, #ff7e5f, #feb47b);
-        }}
+        0% {{ background: linear-gradient(90deg, #ff7e5f, #feb47b); }}
+        25% {{ background: linear-gradient(90deg, #6a11cb, #2575fc); }}
+        50% {{ background: linear-gradient(90deg, #00c6ff, #0072ff); }}
+        75% {{ background: linear-gradient(90deg, #ed4264, #ffedbc); }}
+        100% {{ background: linear-gradient(90deg, #ff7e5f, #feb47b); }}
     }}
-    @keyframes bounce {{
-        0%, 20%, 50%, 80%, 100% {{
-            transform: translateY(0);
-        }}
-        40% {{
-            transform: translateY(-30px);
-        }}
-        60% {{
-            transform: translateY(-15px);
-        }}
+    </style>
+
+    <script>
+    const messages = {messages_json}; 
+    const scrollingText = document.getElementById('scrolling-text');
+    let currentIndex = 0;
+
+    function updateText() {{
+        scrollingText.style.animation = 'none';
+        scrollingText.offsetHeight; 
+        scrollingText.textContent = messages[currentIndex];
+        scrollingText.style.animation = 'scroll-left 15s linear';
+        currentIndex = (currentIndex + 1) % messages.length;
+    }}
+
+    updateText();
+    setInterval(updateText, 15000); 
+
+    scrollingText.addEventListener('animationend', updateText);
+
+    document.getElementById('close-announcement').addEventListener('click', function() {{
+        this.closest('.announcement-container').style.display = 'none';
+    }});
+    </script>
+
+    <style>
+    @keyframes scroll-left {{
+        0% {{ transform: translateX(100%); }}
+        100% {{ transform: translateX(-100%); }}
     }}
     </style>
     """, unsafe_allow_html=True)
+    
+
 def set_background(image_file, is_gif=False):
+    """Sets the background image of the Streamlit app."""
     with open(image_file, "rb") as f:
         img_data = f.read()
     b64_encoded = base64.b64encode(img_data).decode()
@@ -253,63 +203,126 @@ def set_background(image_file, is_gif=False):
     """
     st.markdown(style, unsafe_allow_html=True)
 
-def display_contact_form():
-    """Displays the contact form."""
-    with st.form("contact_form"): 
-        name = st.text_input("Name", key="name_input")
-        email = st.text_input("Email", key="email_input")
-        message = st.text_area("Message", key="message_input")
-        submit_button = st.form_submit_button("Send Message")
-        if submit_button:
-            if all([name, email, message]):
-                st.success("Thanks for your message! I'll get back to you soon.")
-            else:
-                st.warning("Please fill in all fields before submitting.")
+def get_binary_file_downloader_html(bin_file, file_label='File'):
+    bin_str = base64.b64encode(bin_file).decode()
+    href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{file_label}">Download {file_label}</a>'
+    return href
 
 def get_resume_file_path(role, document_type):
-    """Returns the file path for the resume or cover letter based on the role."""
     file_type = "resume" if document_type == "Resume" else "cover_letter"
-    file_path = os.path.join("resume", f"{role.lower().replace(' ', '_')}_{file_type}.pdf")
-    return file_path
+    return f"resume/{role.lower().replace(' ', '_')}_{file_type}.pdf"
+
+def display_pdf(file_path):
+    with open(file_path, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
 def display_resume_section(role):
-    """Displays the Resume/Cover Letter section."""
     st.subheader("Resume & Cover Letter")
     
-    document_choice = st.radio(
-        "Select document to view",
-        options=["Resume", "Cover Letter"],
-        key="document_choice"
-    )
+    col1, col2 = st.columns(2)
+    with col1:
+        document_choice = st.radio("Select document to view", ["Resume", "Cover Letter"])
     
     file_path = get_resume_file_path(role, document_choice)
     file_label = f"{role} {document_choice}"
     
     try:
         display_pdf(file_path)
-        st.markdown(get_binary_file_downloader_html(file_path, file_label), unsafe_allow_html=True)
+        with col2:
+            st.markdown(get_binary_file_downloader_html(open(file_path, "rb").read(), file_label), unsafe_allow_html=True)
     except FileNotFoundError:
         st.error(f"The {file_label} file was not found. Please check if the file exists in the 'resume' folder.")
 
-def contact_section(role):
-    """Displays the Contact section of the portfolio."""
-    st.header("Contact")
+def save_contact_data(data):
+    df = pd.DataFrame([data])
+    csv_buffer = BytesIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+    return csv_buffer
 
-    # Display contact information
-    contact_info = {
-        "Phone": "+91-9912357968",
-        "Email": "shahidnazeerds@gmail.com",
-        "Location": "Hyderabad, India",
-        "LinkedIn": "[LinkedIn Profile](https://www.linkedin.com/in/yourprofile)"
-    }
+def display_saved_data():
+    try:
+        df = pd.read_csv('contact_data.csv')
+        st.write(df)
+    except FileNotFoundError:
+        st.write("No data found.")
+
+def display_contact_form():
+    st.markdown("<h2 style='text-align: center; color: #4A4A4A;'>Send me a message</h2>", unsafe_allow_html=True)
     
-    for key, value in contact_info.items():
-        st.write(f"{key}: {value}")
+    # Load Lottie animation
+    lottie_contact = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_u25cckyh.json")
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        if lottie_contact:
+            st_lottie(lottie_contact, key="contact_animation", height=300)
+        else:
+            st.warning("Failed to load contact animation.")
+    
+    with col2:
+        with st.form("contact_form", clear_on_submit=True):
+            name = st.text_input("Name", key="name_input")
+            email = st.text_input("Email", key="email_input")
+            message = st.text_area("Message", key="message_input")
+            submit_button = st.form_submit_button("Send Message")
 
-    # Display the contact form
+            if submit_button:
+                if all([name, email, message]):
+                    data = {
+                        'Name': name,
+                        'Email': email,
+                        'Message': message,
+                        'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    # Save the data to a CSV file
+                    csv_buffer = save_contact_data(data)
+                    with open('contact_data.csv', 'ab') as f:
+                        f.write(csv_buffer.getvalue())
+                    
+                    st.success("Thanks for your message! I'll get back to you soon.")
+                    
+                    # Load and play the local video file
+                    video_file = open('nsync_bye_bye_bye.mp4', 'rb')
+                    video_bytes = video_file.read()
+                    st.video(video_bytes)
+                    
+                    # Add a fun animation on successful submission
+                    success_animation = load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_touohxv0.json")
+                    if success_animation:
+                        st_lottie(success_animation, key="success_animation", height=200)
+                    else:
+                        st.warning("Failed to load success animation.")
+                else:
+                    st.warning("Please fill in all fields before submitting.")
+            display_saved_data()
+def contact_section(role):
+    st.markdown("<h1 style='text-align: center; color: #2E86C1;'>Contact Me</h1>", unsafe_allow_html=True)
+    
+    # Load Lottie animation for contact info
+    lottie_contact_info = load_lottieurl("https://assets3.lottiefiles.com/packages/lf20_fclga8fl.json")
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        if lottie_contact_info:
+            st_lottie(lottie_contact_info, key="contact_info_animation", height=300)
+        else:
+            st.warning("Failed to load contact info animation.")
+    
+    with col2:
+        st.markdown("<h3 style='color: #4A4A4A;'>Contact Information</h3>", unsafe_allow_html=True)
+        contact_info = {
+            "Phone": "+91-9912357968",
+            "Email": "shahidnazeerds@gmail.com",
+            "Location": "Hyderabad, India",
+            "LinkedIn": "[LinkedIn Profile](https://www.linkedin.com/in/yourprofile)"
+        }
+        for key, value in contact_info.items():
+            st.markdown(f"<p><strong>{key}:</strong> {value}</p>", unsafe_allow_html=True)
+    
+    st.markdown("<hr>", unsafe_allow_html=True)
     display_contact_form()
-
-    # Display the resume/cover letter section
-    display_resume_section(role)
-
-st.markdown(f"<link rel='stylesheet' href='style.css'>", unsafe_allow_html=True)

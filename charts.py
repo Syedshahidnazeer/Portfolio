@@ -2,7 +2,7 @@ import plotly.express as px
 import streamlit as st
 import pandas as pd
 
-def create_chart(data, chart_type, title=None, x=None, y=None, **kwargs):
+def create_chart(data, chart_type, title=None, role=None, x=None, y=None, **kwargs):  # Add role parameter
     """Creates a chart using Plotly Express."""
 
     chart_functions = {
@@ -11,10 +11,10 @@ def create_chart(data, chart_type, title=None, x=None, y=None, **kwargs):
         'pie': px.pie,
         'scatter': px.scatter,
         'line_polar': px.line_polar,
-        'histogram': px.histogram,  # Add histogram chart type
-        'box': px.box,  # Add box plot chart type
-        'violin': px.violin,  # Add violin plot chart type
-        'scatter_3d': px.scatter_3d,  # Add 3D scatter chart type
+        'histogram': px.histogram, 
+        'box': px.box,
+        'violin': px.violin, 
+        'scatter_3d': px.scatter_3d,
     }
 
     chart_func = chart_functions.get(chart_type)
@@ -25,7 +25,11 @@ def create_chart(data, chart_type, title=None, x=None, y=None, **kwargs):
             # Remove 'r' and 'theta' from kwargs if they exist
             kwargs.pop('r', None)
             kwargs.pop('theta', None)
-            fig = chart_func(data, r=y, theta=x, title=title, **kwargs)
+            fig = chart_func(data, 
+                            r=y, 
+                            theta=x, 
+                            title=f"{role} {title}" if role else title,  # Include role in title
+                            **kwargs)
         else:
             fig = chart_func(data, x=x, y=y, title=title, **kwargs)
         return fig
@@ -105,13 +109,13 @@ def create_project_impact_chart():
 @st.cache_data
 def create_radar_chart(skills_data, role):
     """Creates a radar chart for skill proficiency."""
-    radar_chart = create_chart(skills_data,
-                                'line_polar',
-                                title=f"{role} Skill Proficiency",
-                                theta='Skill',
-                                line_close=True)
-    radar_chart.update_traces(fill='toself')
-    return radar_chart
+    fig = px.line_polar(skills_data, 
+                        r='Proficiency', 
+                        theta='Skill', 
+                        line_close=True, 
+                        title=f"{role} Skill Proficiency")
+    fig.update_traces(fill='toself')
+    return fig
 
 @st.cache_data
 def create_bar_chart(skills_data, role):
