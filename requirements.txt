@@ -4,6 +4,7 @@ streamlit_option_menu
 streamlit_chat
 streamlit-lottie
 PyPDF2
+hydralit
 fpdf
 pyyaml
 pydub
