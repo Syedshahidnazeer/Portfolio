@@ -5,6 +5,7 @@ streamlit_chat
 streamlit-lottie
 PyPDF2
 hydralit
+hydralit_components
 fpdf
 pyyaml
 pydub
