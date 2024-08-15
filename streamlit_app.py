@@ -20,7 +20,6 @@ import PyPDF2 as pdf
 import yaml
 from pyvis.network import Network
 from streamlit_option_menu import option_menu
-import hydralit_components as hc
 from streamlit_lottie import st_lottie
 import google.generativeai as genai
 
@@ -286,16 +285,16 @@ def main():
         {"icon": "code-slash", "label": "Python Developer"}
     ]
 
-    role = hc.option_bar(
-        option_definition=role_options,
-        override_theme={
-            "background": "rgba(255,255,255,0.1)",
-            "base": "light",
-            "primaryColor": "#4b6cb7",
-            "secondaryColor": "#182848",
-            "font": "sans serif",
-        },
-        key="role_selector"
+    role = option_menu(
+        menu_title=None,  # No menu title
+        options=[option["label"] for option in role_options],  # Extract labels for options
+        icons=[option["icon"] for option in role_options],  # Extract icons for options
+        menu_icon="cast",  # Optional: Add a menu icon
+        default_index=0,
+        orientation="horizontal",
+        styles={
+            # ... (Your styles for the role selection menu) ...
+        }
     )
 
     # Background Setting
@@ -308,6 +307,7 @@ def main():
 
     # Navigation
     nav_options = [
+        {"icon": "house", "label": "Home"},
         {"icon": "gear", "label": "Skills"},
         {"icon": "code-slash", "label": "Projects"},
         {"icon": "envelope", "label": "Contact"},
@@ -316,26 +316,17 @@ def main():
         {"icon": "database", "label": "Data Science"}
     ]
 
-    selected = hc.nav_bar(
-        menu_definition=nav_options,
-        override_theme={
-            "background": "rgba(255,255,255,0.1)",
-            "base": "light",
-            "primaryColor": "#4b6cb7",
-            "secondaryColor": "#182848",
-            "font": "sans serif",
-        },
-        home_name="Home",
-        sticky_nav=True,
-        hide_streamlit_markers=True,
-        sticky_mode="pinned",
-        use_animation=True,
-        key="main_nav"
+    selected = option_menu(
+        menu_title=None,  # No menu title
+        options=[option["label"] for option in nav_options],  # Extract labels for options
+        icons=[option["icon"] for option in nav_options],  # Extract icons for options
+        menu_icon="cast",  # Optional: Add a menu icon
+        default_index=0,
+        orientation="horizontal",
+        styles={
+            # ... (Your styles for the navigation menu) ...
+        }
     )
-    with hc.HyLoader("Loading...", hc.Loaders.pacman):
-        # Your code here
-        time.sleep(2)
-
     # --- Function to encode video file to base64 ---
     def encode_video(video_path):
         with open(video_path, "rb") as video_file:
