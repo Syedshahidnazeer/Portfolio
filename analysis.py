@@ -10,8 +10,6 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from lifelines import KaplanMeierFitter
-from lifelines import CoxPHFitter
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
@@ -181,23 +179,6 @@ class AutomatedTestingFramework:
         principal_components = pca.fit_transform(X_scaled)
         return principal_components
 
-    def kaplan_meier(self, time_column, event_column):
-        """Perform Kaplan-Meier survival analysis."""
-        if time_column not in self.data.columns or event_column not in self.data.columns:
-            return f"Error: One or more columns not found in the dataset."
-        kmf = KaplanMeierFitter()
-        kmf.fit(self.data[time_column], event_observed=self.data[event_column])
-        kmf.plot()
-        st.pyplot()
-
-    def cox_proportional_hazards(self, time_column, event_column, predictors):
-        """Perform Cox Proportional Hazards analysis."""
-        if any(col not in self.data.columns for col in [time_column, event_column] + predictors):
-            return f"Error: One or more columns not found in the dataset."
-        cph = CoxPHFitter()
-        cph.fit(self.data[[time_column, event_column] + predictors], duration_col=time_column, event_col=event_column)
-        cph.print_summary()
-
 
 def data_analysis_page():
     # Streamlit app
@@ -343,26 +324,3 @@ def data_analysis_page():
             else:
                 result = atf.pca(n_components, selected_columns_pca)
                 st.write(result)
-
-        # Survival Analysis - Kaplan-Meier
-        st.write("## Survival Analysis - Kaplan-Meier")
-        selected_time_column = st.selectbox("Select time column:", data.columns)
-        selected_event_column = st.selectbox("Select event column:", data.columns)
-        if st.button("Run Kaplan-Meier"):
-            invalid_columns = atf.check_data_type([selected_time_column], [np.number])
-            if invalid_columns:
-                st.error("Error in Kaplan-Meier: " + ", ".join(invalid_columns))
-            else:
-                atf.kaplan_meier(selected_time_column, selected_event_column)
-
-        # Survival Analysis - Cox Proportional Hazards
-        st.write("## Survival Analysis - Cox Proportional Hazards")
-        selected_time_column_cph = st.selectbox("Select time column (CPH):", data.columns)
-        selected_event_column_cph = st.selectbox("Select event column (CPH):", data.columns)
-        selected_predictors_cph = st.multiselect("Select predictors (CPH):", data.columns)
-        if st.button("Run Cox Proportional Hazards"):
-            invalid_columns = atf.check_data_type([selected_time_column_cph] + selected_predictors_cph, [np.number])
-            if invalid_columns:
-                st.error("Error in Cox Proportional Hazards: " + ", ".join(invalid_columns))
-            else:
-                atf.cox_proportional_hazards(selected_time_column_cph, selected_event_column_cph, selected_predictors_cph)
