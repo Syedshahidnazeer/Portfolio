@@ -1,134 +1,74 @@
-/* ... your existing styles ... */
-body {
-    font-family: 'Arial', sans-serif;
+/* Target Streamlit container directly */
+[data-testid="stAppViewContainer"] {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: #222;
-    margin-bottom: 10px;
+/* Adjust header and toolbar */
+.stApp header, [data-testid="stToolbar"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    z-index: 999; 
 }
 
-p {
-    line-height: 1.6;
-}
-
-a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-.stApp .st-bf {
-    padding: 0 !important; /* Remove default padding */
-    margin-top: 0 !important; /* Remove default margin */
-}
-
-/* Style for the main menu (st.selectbox) */
-.stSelectbox {
-    /* Style the selectbox as you like */
-    width: 100%;
-    max-width: 300px;
-    margin: 1rem auto;
-    padding: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-    font-size: 1.2rem;
-    color: #333;
-}
-
-/* Navigation Bar Styling */
-.navbar {
-    background-color: #333333; /* Example background color */
-    padding: 10px;
-    position: fixed; /* Make the navbar fixed */
-    top: 0; /* Position it at the top */
-    width: 100%;
-    z-index: 100; /* Ensure it's on top of other content */
-}
-
-.navbar-item {
-    display: inline-block;
-    margin: 0 10px;
-    color: white; /* Example text color */
-    text-decoration: none;
-    transition: all 0.3s ease; /* Add transition for hover effect */
-}
-
-.navbar-item:hover {
-    color: #4CAF50; /* Example hover color */
-}
-
-/* Animation for the navbar on hover */
-.navbar-item.navbar-hover {
-    animation: navbar-hover-animation 0.3s ease;
-}
-
-@keyframes navbar-hover-animation {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Content Area Styling */
-.content-area {
-    padding-top: 70px; /* Add padding to account for the navbar height */
-    padding-bottom: 2rem;
-}
-
-/* Remove top padding from the main container */
-.main .block-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-/* Force content to start at the top */
+/* Ensure content starts at the very top */
 [data-testid="stAppViewContainer"] > div:first-child {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+    margin-top: 0;
+    padding-top: 0;
 }
 
-/* Ensure navigation bars are visible */
-[data-testid="stToolbar"] {
-    visibility: visible !important;
-    height: auto !important;
-    opacity: 1 !important;
+/* Remove extra space from navigation components */
+.nav-bar-container, .nav-bar {
+    margin: 0;
+    padding: 0;
+}
+
+/* Adjust spacing for content area */
+.content-area {
+    padding-top: 0;
+    margin-top: 0;
+}
+
+/* Force all direct children of the app container to start at the top */
+[data-testid="stAppViewContainer"] > * {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* Ensure no unwanted scrollbars */
+.stApp, body {
+    overflow-x: hidden;
+}
+
+/* Maintain visibility of important components */
+[data-testid="stToolbar"], .stApp header {
+    visibility: visible;
+    opacity: 1;
 }
 
 /* Adjust header padding */
 .stApp header {
-    padding-top: 0 !important;
+    padding-top: 0;
+}
+
+/* Additional adjustments to remove any remaining gap */
+.stApp > div:first-child > div {
+    margin-top: 0;
+    padding-top: 0;
 }
 
 /* Announcement Styling */
 .announcement-container {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(255, 255, 255, 0.9);
     padding: 10px;
-    border-bottom: 1px solid #eee;
-    animation: fadeOut 3s ease-in-out forwards;
+    background-color: #f0f0f0; /* Set background color */
+    text-align: center;
+    border-bottom: 1px solid #ddd; /* Add a bottom border */
+    font-weight: bold; /* Make the text bold */
 }
-
 .announcement-shine {
     position: absolute;
     top: 0;
@@ -137,7 +77,7 @@ a:hover {
     height: 100%;
     background-image: linear-gradient(to right, #007bff, #00c698, #00c698, #007bff);
     animation: shine 2s linear infinite;
-    z-index: -1;
+    z-index: -1; /* Keep the shine behind the content */
 }
 
 .announcement-content {
@@ -165,12 +105,17 @@ a:hover {
     color: #007bff;
 }
 
+/* Example using data-testid */
+[data-testid="stAnnoucement"] {
+    padding: 0;
+    margin: 0;
+}
+
 /* Animations */
 @keyframes fadeOut {
     0% { opacity: 1; }
     100% { opacity: 0; transform: translateY(-20px); }
 }
-
 @keyframes shine {
     0% { background-position: 0 0; }
     100% { background-position: 100% 0; }
@@ -238,22 +183,22 @@ a:hover {
 
 /* Compact layout adjustments */
 .stSelectbox {
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 0.5rem;
 }
 
 .stTabs {
-    margin-top: -0.5rem !important;
+    margin-top: -0.5rem;
 }
 
 .css-12oz5g7, .css-1d391kg {
-    padding-top: 0.2rem !important;
-    padding-bottom: 0.2rem !important;
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
 }
 
 /* Reduce space between sections */
 .stApp > div > div > div > div {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 .nav-container {
     display: flex;
@@ -263,14 +208,56 @@ a:hover {
 
 /* Ensure the nav bars are flush against each other */
 .nav-bar-container {
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0;
+    padding: 0;
 }
 
 /* Responsive Styles for Network Graphs */
 @media (max-width: 768px) {
     .network-graph {
-        width: 100%; 
+        width: 100%;
         height: 400px; /* Adjust height as needed */
     }
+}
+
+/* Apply gradient backgrounds to navbar items */
+.option-menu .nav-link {
+    background-size: cover;
+    background-repeat: no-repeat;
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Gradient for Home (top-left in your image) */
+.option-menu .nav-link:nth-child(1) {
+    background-image: linear-gradient(to bottom right, #8be9fd, #53cbf1);
+}
+
+/* Gradient for Skills (top-right) */
+.option-menu .nav-link:nth-child(2) {
+    background-image: linear-gradient(to bottom right, #f12711, #f5af19);
+}
+
+/* Gradient for Projects (bottom-left) */
+.option-menu .nav-link:nth-child(3) {
+    background-image: linear-gradient(to bottom right, #4facfe, #00f2fe);
+}
+
+/* Gradient for Contact (bottom-right) */
+.option-menu .nav-link:nth-child(4) {
+    background-image: linear-gradient(to bottom right, #a6c0fe, #f68084); 
+}
+
+/* Gradient for Chat Bot (bottom-right) */
+.option-menu .nav-link:nth-child(5) {
+    background-image: linear-gradient(to bottom right, #a6c0fe, #f68084); 
+}
+
+/* Style for selected navbar item */
+.option-menu .nav-link-selected {
+    /* You can add specific styles for the selected item if needed */
+}
+/* In your styles.css file */
+#indian-flag-animation-container, body {
+    margin: 0;
+    padding: 0;
 }
